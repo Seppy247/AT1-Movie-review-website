@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PWA Reviews</title>
+    <style>
+        body {
+            text-align: center;
+            font-family: Arial, sans-serif;
+        }
+        nav ul {
+            list-style: none;
+            padding: 0;
+        }
+        nav ul li {
+            display: inline;
+            margin: 0 10px;
+        }
+        .review {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-bottom: 10px;
+            text-align: left;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>Movie Review App</h1>
+
+    <p>Welcome to the review app.</p>
+
+    <hr>
+
+    <!-- Navigation -->
+    <nav>
+        <ul>
+            <li><a href="{{ url_for('home') }}">Home</a></li>
+            <li><a href="{{ url_for('add_review') }}">Add Review</a></li>
+
+            {% if session.username %}
+                <li>Logged in as {{ session.username }}</li>
+                <li><a href="{{ url_for('logout') }}">Logout</a></li>
+            {% else %}
+                <li><a href="{{ url_for('login') }}">Login</a></li>
+                <li><a href="{{ url_for('register') }}">Register</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+
+    <hr>
+
+    <h2>Recent Reviews</h2>
+
+    <!-- Loop through reviews sent from Flask -->
+    {% for review in reviews %}
+        <div class="review">
+            <h3>{{ review["title"] }}</h3>
+            <p><strong>Rating:</strong> {{ review["rating"] }}/5</p>
+            <p>{{ review["content"] }}</p>
+            <p><em>Reviewed by {{ review["username"] }} on {{ review["date"] }}</em></p>
+        </div>
+    {% endfor %}
+
+</body>
+</html>
