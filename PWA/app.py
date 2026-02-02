@@ -229,6 +229,143 @@ def add_review():
     return render_template("add_review.html", films=films)
 
 # -----------------------
+# VIEW REVIEW PAGE
+# -----------------------
+@app.route("/review/<int:review_id>")
+def view_review(review_id):
+    """Display a single review."""
+    conn = get_db_connection()
+    review = conn.execute("""
+        SELECT reviews.id, 
+               reviews.title, 
+               reviews.rating, 
+               reviews.content, 
+               reviews.date, 
+               reviews.photo, 
+               reviews.user_id,
+               films.title as film_title,
+               users.username
+        FROM reviews
+        JOIN films ON reviews.film_id = films.id
+        JOIN users ON reviews.user_id = users.id
+        WHERE reviews.id = ?
+    """, (review_id,)).fetchone()
+    conn.close()
+
+    if not review:
+        flash("Review not found.", "error")
+        return redirect(url_for("home"))
+
+    return render_template("review.html", review=review)
+
+# -----------------------
+# EDIT REVIEW PAGE
+# -----------------------
+@app.route("/edit-review/<int:review_id>", methods=["GET", "POST"])
+def edit_review(review_id):
+    """Allow users to edit their own reviews."""
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+
+    conn = get_db_connection()
+    review = conn.execute("""
+        SELECT * FROM reviews WHERE id = ?
+    """, (review_id,)).fetchone()
+    conn.close()
+
+    if not review:
+        flash("Review not found.", "error")
+        return redirect(url_for("home"))
+
+    if review["user_id"] != session["user_id"]:
+        flash("You can only edit your own reviews.", "error")
+        return redirect(url_for("home"))
+
+    conn = get_db_connection()
+    films = conn.execute("SELECT id, title FROM films ORDER BY title").fetchall()
+    conn.close()
+
+    if request.method == "POST":
+        title = request.form.get("title", "").strip()
+        rating = request.form.get("rating", "")
+        content = request.form.get("content", "").strip()
+        film_id = request.form.get("film_id", "")
+        new_film_title = request.form.get("new_film", "").strip()
+        file = request.files.get("photo")
+
+        # Basic validation
+        if not title or not rating or not content:
+            flash("Please fill in all required fields.", "error")
+            return redirect(url_for("edit_review", review_id=review_id))
+
+        # Handle new film creation or validate existing film selection
+        if film_id == "new":
+            if not new_film_title:
+                flash("Please enter a film title to add.", "error")
+                return redirect(url_for("edit_review", review_id=review_id))
+            conn = get_db_connection()
+            existing = conn.execute("SELECT id FROM films WHERE title = ? COLLATE NOCASE", (new_film_title,)).fetchone()
+            if existing:
+                film_id = existing["id"]
+            else:
+                conn.execute("INSERT INTO films (title) VALUES (?)", (new_film_title,))
+                conn.commit()
+                film_id = conn.execute("SELECT id FROM films WHERE title = ? COLLATE NOCASE", (new_film_title,)).fetchone()["id"]
+            conn.close()
+        else:
+            try:
+                film_id = int(film_id)
+            except ValueError:
+                flash("Invalid film selection.", "error")
+                return redirect(url_for("edit_review", review_id=review_id))
+            conn = get_db_connection()
+            film = conn.execute("SELECT id FROM films WHERE id = ?", (film_id,)).fetchone()
+            conn.close()
+            if not film:
+                flash("Selected film not found.", "error")
+                return redirect(url_for("edit_review", review_id=review_id))
+
+        # Validate rating
+        try:
+            rating = int(rating)
+            if rating < 1 or rating > 5:
+                raise ValueError
+        except ValueError:
+            flash("Rating must be an integer between 1 and 5.", "error")
+            return redirect(url_for("edit_review", review_id=review_id))
+
+        # Handle file upload
+        filename = review["photo"]
+        if file and file.filename:
+            if allowed_file(file.filename):
+                filename = secure_filename(file.filename)
+                import time
+                filename = f"{int(time.time())}_{filename}"
+                file.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
+            else:
+                flash("Invalid file type. Please upload an image (png, jpg, jpeg, gif).", "error")
+                return redirect(url_for("edit_review", review_id=review_id))
+
+        try:
+            conn = get_db_connection()
+            conn.execute("""
+                UPDATE reviews
+                SET title = ?, rating = ?, content = ?, film_id = ?, photo = ?
+                WHERE id = ?
+            """, (title, rating, content, film_id, filename, review_id))
+            conn.commit()
+            conn.close()
+
+            flash("Review updated successfully!", "success")
+            return redirect(url_for("view_review", review_id=review_id))
+
+        except Exception as e:
+            flash(f"Error updating review: {str(e)}", "error")
+            return redirect(url_for("edit_review", review_id=review_id))
+
+    return render_template("edit_review.html", review=review, films=films)
+
+# -----------------------
 # RUN APP
 # -----------------------
 if __name__ == "__main__":
