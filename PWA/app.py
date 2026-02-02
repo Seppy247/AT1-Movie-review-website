@@ -73,9 +73,12 @@ def home():
                reviews.content,
                reviews.date,
                reviews.photo,
+               reviews.user_id,
+               films.title AS film_title,
                users.username
         FROM reviews
         JOIN users ON reviews.user_id = users.id
+        JOIN films ON reviews.film_id = films.id
         ORDER BY reviews.id DESC
     """).fetchall()
     conn.close()

@@ -266,12 +266,8 @@
     </div>
 
     <script>
-        // Film data from template
-        const films = [
-            {% for film in films %}
-                { id: {{ film['id'] }}, title: '{{ film['title'] }}' },
-            {% endfor %}
-        ];
+        // Film data from template (JSON-encoded for safety)
+        const films = {{ films | tojson | safe }};
 
         const filmSearch = document.getElementById('filmSearch');
         const filmDropdown = document.getElementById('filmDropdown');

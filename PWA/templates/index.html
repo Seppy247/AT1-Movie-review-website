@@ -22,6 +22,26 @@
             --success: #22c55e;
             --error: #ef4444;
         }
+        
+        <script>
+            // allow clicking the whole review card to show owner actions (or navigate for others)
+            const currentUser = {{ session.get('user_id')|tojson }};
+            document.querySelectorAll('.review').forEach(r => {
+                r.addEventListener('click', (e) => {
+                    // ignore clicks on links, buttons, forms
+                    if (e.target.closest('a') || e.target.closest('button') || e.target.closest('form')) return;
+                    const owner = r.dataset.owner ? parseInt(r.dataset.owner) : null;
+                    if (currentUser && owner && currentUser === owner) {
+                        r.classList.toggle('show-actions');
+                    } else {
+                        const link = r.querySelector('h3 a');
+                        if (link) window.location = link.href;
+                    }
+                });
+                const actions = r.querySelector('.card-actions');
+                if (actions) actions.addEventListener('click', (e) => e.stopPropagation());
+            });
+        </script>
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
@@ -347,6 +367,33 @@
             border-radius: 12px;
             margin-bottom: 1rem;
         }
+        .card-actions {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(6,6,10,0.6);
+            backdrop-filter: blur(6px);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.18s ease;
+        }
+
+        .actions-panel {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+            background: rgba(26,26,46,0.9);
+            padding: 0.75rem;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+        }
+
+        .review.show-actions .card-actions {
+            opacity: 1;
+            pointer-events: auto;
+        }
     </style>
 </head>
 
@@ -399,7 +446,7 @@
         {% if reviews %}
             <div class="reviews-grid">
                 {% for review in reviews %}
-                    <div class="review">
+                    <div class="review" data-owner="{{ review['user_id'] }}">
                         {% if review["photo"] %}
                             <img src="{{ url_for('static', filename='uploads/' + review['photo']) }}" alt="{{ review['title'] }}" class="review-photo">
                         {% endif %}
@@ -415,6 +462,19 @@
                         <p>{{ review["content"] }}</p>
                         <div class="review-meta">
                             Reviewed by <strong>{{ review["username"] }}</strong> on {{ review["date"] }}
+                        </div>
+
+                        <div class="card-actions" aria-hidden="true">
+                            <div class="actions-panel">
+                                <a class="button" href="{{ url_for('view_review', review_id=review['id']) }}">View</a>
+                                {% if session.user_id and session.user_id == review['user_id'] %}
+                                    <a class="button" href="{{ url_for('edit_review', review_id=review['id']) }}">Edit</a>
+                                    <form class="inline" method="post" action="{{ url_for('delete_review', review_id=review['id']) }}" onsubmit="return confirm('Delete this review?');">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                        <button type="submit">Delete</button>
+                                    </form>
+                                {% endif %}
+                            </div>
                         </div>
                     </div>
                 {% endfor %}
