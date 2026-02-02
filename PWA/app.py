@@ -89,18 +89,38 @@ def home():
 # -----------------------
 @app.route("/register", methods=["GET", "POST"])
 def register():
-    """Allow new users to register with hashed passwords."""
+    """Allow new users to register with hashed passwords and validate strength."""
     if request.method == "POST":
-        username = request.form["username"]
-        password = generate_password_hash(request.form["password"])
+        username = request.form["username"].strip()
+        raw_password = request.form["password"]
+
+        # Server-side password validation
+        if len(raw_password) < 6:
+            flash("Password must be at least 6 characters long.", "error")
+            return redirect(url_for("register"))
+        if not any(c.isupper() for c in raw_password):
+            flash("Password must include at least one uppercase letter.", "error")
+            return redirect(url_for("register"))
+        if not any(c.isdigit() for c in raw_password):
+            flash("Password must include at least one number.", "error")
+            return redirect(url_for("register"))
 
         conn = get_db_connection()
+        # Check if username already exists
+        existing = conn.execute("SELECT id FROM users WHERE username = ?", (username,)).fetchone()
+        if existing:
+            conn.close()
+            flash("Username already taken. Please choose a different username.", "error")
+            return redirect(url_for("register"))
+
+        password_hash = generate_password_hash(raw_password)
         conn.execute(
             "INSERT INTO users (username, password) VALUES (?, ?)",
-            (username, password)
+            (username, password_hash)
         )
         conn.commit()
         conn.close()
+        flash("Account created successfully! Please log in.", "success")
         return redirect(url_for("login"))
 
     return render_template("register.html")
@@ -127,7 +147,8 @@ def login():
             session["username"] = user["username"]
             return redirect(url_for("home"))
         else:
-            return "Invalid login credentials. Please try again."
+            flash("Invalid username or password. Please try again.", "error")
+            return redirect(url_for("login"))
 
     return render_template("login.html")
 
