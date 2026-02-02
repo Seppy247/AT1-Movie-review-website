@@ -205,6 +205,78 @@
             color: var(--accent);
         }
 
+        /* Search input styling */
+        .search-input-wrapper {
+            position: relative;
+            margin-bottom: 0.5rem;
+        }
+
+        .search-input-wrapper input {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            background: var(--bg-secondary);
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            font-family: inherit;
+            transition: all 0.2s ease;
+        }
+
+        .search-input-wrapper input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(234, 179, 8, 0.1);
+        }
+
+        .search-input-wrapper input::placeholder {
+            color: var(--text-secondary);
+        }
+
+        .search-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-top: none;
+            border-radius: 0 0 10px 10px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 10;
+            display: none;
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .search-dropdown.active {
+            display: block;
+        }
+
+        .search-dropdown li {
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            transition: background 0.2s ease;
+            color: var(--text-secondary);
+        }
+
+        .search-dropdown li:hover,
+        .search-dropdown li.selected {
+            background: var(--bg-card);
+            color: var(--accent);
+        }
+
+        .search-dropdown li.empty {
+            color: var(--text-secondary);
+            cursor: default;
+        }
+
+        .search-dropdown li.empty:hover {
+            background: transparent;
+        }
+
         /* Rating stars preview */
         .rating-preview {
             display: flex;
@@ -332,18 +404,18 @@
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <div class="form-group">
                     <label for="title">Movie Title</label>
-                    <input type="text" id="title" name="title" placeholder="Enter movie title" required>
+                    <div class="search-input-wrapper">
+                        <input type="text" id="title" name="title" placeholder="Type movie title..." required>
+                    </div>
                 </div>
 
                 <div class="form-group">
-                    <label for="film">Select Film</label>
-                    <select id="film" name="film_id" required onchange="toggleNewFilm(this.value)">
-                        <option value="">Select film</option>
-                        {% for film in films %}
-                            <option value="{{ film['id'] }}">{{ film['title'] }}</option>
-                        {% endfor %}
-                        <option value="new">➕ Add new film...</option>
-                    </select>
+                    <label for="filmSearch">Select Film</label>
+                    <div class="search-input-wrapper">
+                        <input type="text" id="filmSearch" placeholder="Search or select film...">
+                        <ul class="search-dropdown" id="filmDropdown"></ul>
+                    </div>
+                    <input type="hidden" id="film" name="film_id">
                     <div id="newFilmWrapper" style="margin-top:0.75rem; display:none;">
                         <input type="text" id="newFilm" name="new_film" placeholder="Enter new film title" style="width:100%; padding:0.75rem; border-radius:8px; background:var(--bg-secondary); border:2px solid var(--border); color:var(--text-primary);">
                     </div>
@@ -389,6 +461,84 @@
     </div>
 
     <script>
+        // Film data from template
+        const films = [
+            {% for film in films %}
+                { id: {{ film['id'] }}, title: '{{ film['title'] }}' },
+            {% endfor %}
+        ];
+
+        const filmSearch = document.getElementById('filmSearch');
+        const filmDropdown = document.getElementById('filmDropdown');
+        const filmInput = document.getElementById('film');
+        const newFilmWrapper = document.getElementById('newFilmWrapper');
+        const newFilm = document.getElementById('newFilm');
+
+        // Populate dropdown with all films on focus
+        filmSearch.addEventListener('focus', () => {
+            displayFilmOptions(films);
+        });
+
+        // Filter films on input
+        filmSearch.addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase();
+            const filtered = films.filter(film => 
+                film.title.toLowerCase().includes(query)
+            );
+            displayFilmOptions(filtered);
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            if (e.target !== filmSearch) {
+                filmDropdown.classList.remove('active');
+            }
+        });
+
+        function displayFilmOptions(options) {
+            filmDropdown.innerHTML = '';
+            
+            if (options.length === 0) {
+                const li = document.createElement('li');
+                li.className = 'empty';
+                li.textContent = '➕ No films found - Add new film';
+                li.onclick = () => {
+                    filmSearch.value = '';
+                    filmInput.value = 'new';
+                    newFilmWrapper.style.display = 'block';
+                    newFilm.required = true;
+                    filmSearch.required = false;
+                    filmDropdown.classList.remove('active');
+                    newFilm.focus();
+                };
+                filmDropdown.appendChild(li);
+            } else {
+                options.forEach(film => {
+                    const li = document.createElement('li');
+                    li.textContent = film.title;
+                    li.onclick = () => {
+                        filmSearch.value = film.title;
+                        filmInput.value = film.id;
+                        newFilmWrapper.style.display = 'none';
+                        newFilm.required = false;
+                        filmSearch.required = true;
+                        filmDropdown.classList.remove('active');
+                    };
+                    filmDropdown.appendChild(li);
+                });
+            }
+            
+            filmDropdown.classList.add('active');
+        }
+
+        // Validate that either a film is selected or new film is entered
+        document.querySelector('form').addEventListener('submit', (e) => {
+            if (!filmInput.value && newFilm.value === '') {
+                e.preventDefault();
+                alert('Please select a film or enter a new film title');
+            }
+        });
+
         function updateFileName(input) {
             const fileName = document.getElementById('fileName');
             if (input.files && input.files[0]) {
@@ -411,21 +561,6 @@
                 preview.textContent = stars;
             } else {
                 preview.textContent = '';
-            }
-        }
-
-        function toggleNewFilm(val) {
-            const wrapper = document.getElementById('newFilmWrapper');
-            const newFilm = document.getElementById('newFilm');
-            const select = document.getElementById('film');
-            if (val === 'new') {
-                wrapper.style.display = 'block';
-                newFilm.required = true;
-                select.removeAttribute('required');
-            } else {
-                wrapper.style.display = 'none';
-                newFilm.required = false;
-                select.required = true;
             }
         }
     </script>

@@ -4,11 +4,203 @@
     <title>Edit Review - CineVibe</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0a0a14; color: #fff; }
-        .container { max-width: 700px; margin: 3rem auto; padding: 1.5rem; }
-        .card { background:#1a1a2e; padding:1.5rem; border-radius:12px; border:1px solid #27273a }
-        input[type="text"], textarea, select { width:100%; padding:0.8rem; border-radius:8px; background:#14141f; color:#fff; border:1px solid #27273a }
-        button { background: linear-gradient(135deg,#eab308 0%,#fbbf24 100%); color:#0a0a14; padding:0.6rem 1rem; border-radius:8px; border:none; font-weight:700 }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0a0a14;
+            --bg-secondary: #14141f;
+            --bg-card: #1a1a2e;
+            --accent: #eab308;
+            --accent-hover: #fbbf24;
+            --text-primary: #ffffff;
+            --text-secondary: #a1a1aa;
+            --border: #27273a;
+        }
+
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+            background: var(--bg-primary); 
+            color: var(--text-primary);
+        }
+
+        .container { 
+            max-width: 700px; 
+            margin: 3rem auto; 
+            padding: 1.5rem; 
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1.5rem;
+        }
+
+        .card { 
+            background: var(--bg-card); 
+            padding: 1.5rem; 
+            border-radius: 12px; 
+            border: 1px solid var(--border);
+        }
+
+        h1 {
+            margin-bottom: 1.5rem;
+            font-size: 1.75rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        input[type="text"], 
+        textarea, 
+        select { 
+            width: 100%; 
+            padding: 0.8rem; 
+            border-radius: 8px; 
+            background: var(--bg-secondary); 
+            color: var(--text-primary); 
+            border: 1px solid var(--border);
+            font-family: inherit;
+            font-size: 1rem;
+            transition: all 0.2s ease;
+        }
+
+        input[type="text"]:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(234, 179, 8, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        button { 
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%); 
+            color: var(--bg-primary); 
+            padding: 0.8rem 1.5rem; 
+            border-radius: 8px; 
+            border: none; 
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(234, 179, 8, 0.3);
+        }
+
+        .back-link {
+            margin-top: 1rem;
+        }
+
+        .back-link a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .back-link a:hover {
+            color: var(--accent);
+        }
+
+        /* Search input styling */
+        .search-input-wrapper {
+            position: relative;
+            margin-bottom: 0.5rem;
+        }
+
+        .search-input-wrapper input {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            font-family: inherit;
+            transition: all 0.2s ease;
+        }
+
+        .search-input-wrapper input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(234, 179, 8, 0.1);
+        }
+
+        .search-input-wrapper input::placeholder {
+            color: var(--text-secondary);
+        }
+
+        .search-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 10;
+            display: none;
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .search-dropdown.active {
+            display: block;
+        }
+
+        .search-dropdown li {
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            transition: background 0.2s ease;
+            color: var(--text-secondary);
+        }
+
+        .search-dropdown li:hover,
+        .search-dropdown li.selected {
+            background: var(--bg-card);
+            color: var(--accent);
+        }
+
+        .search-dropdown li.empty {
+            color: var(--text-secondary);
+            cursor: default;
+        }
+
+        .search-dropdown li.empty:hover {
+            background: transparent;
+        }
+
+        img {
+            max-width: 200px;
+            border-radius: 8px;
+            margin: 0.75rem 0;
+        }
     </style>
 </head>
 <body>
@@ -23,20 +215,20 @@
 
                 <div class="form-group">
                     <label for="title">Movie Title</label>
-                    <input type="text" id="title" name="title" value="{{ review['title'] }}" required>
+                    <div class="search-input-wrapper">
+                        <input type="text" id="title" name="title" value="{{ review['title'] }}" required>
+                    </div>
                 </div>
 
                 <div class="form-group">
-                    <label for="film">Select Film</label>
-                    <select id="film" name="film_id" required onchange="toggleNewFilmEdit(this.value)">
-                        <option value="">Select film</option>
-                        {% for film in films %}
-                            <option value="{{ film['id'] }}" {% if film['id'] == review['film_id'] %}selected{% endif %}>{{ film['title'] }}</option>
-                        {% endfor %}
-                        <option value="new">➕ Add new film...</option>
-                    </select>
+                    <label for="filmSearch">Select Film</label>
+                    <div class="search-input-wrapper">
+                        <input type="text" id="filmSearch" placeholder="Search or select film...">
+                        <ul class="search-dropdown" id="filmDropdown"></ul>
+                    </div>
+                    <input type="hidden" id="film" name="film_id" value="{{ review['film_id'] }}">
                     <div id="newFilmWrapperEdit" style="margin-top:0.75rem; display:none;">
-                        <input type="text" id="newFilmEdit" name="new_film" placeholder="Enter new film title" style="width:100%; padding:0.75rem; border-radius:8px; background:#14141f; border:1px solid #27273a; color:#fff;">
+                        <input type="text" id="newFilmEdit" name="new_film" placeholder="Enter new film title" style="width:100%; padding:0.75rem; border-radius:8px; background:var(--bg-secondary); border:1px solid var(--border); color:var(--text-primary);">
                     </div>
                 </div>
 
@@ -58,9 +250,9 @@
                 <div class="form-group">
                     <label>Current Photo</label>
                     {% if review['photo'] %}
-                        <div style="margin-bottom:0.75rem"><img src="{{ url_for('static', filename='uploads/' + review['photo']) }}" alt="photo" style="max-width:200px; border-radius:8px"></div>
+                        <div><img src="{{ url_for('static', filename='uploads/' + review['photo']) }}" alt="photo"></div>
                     {% else %}
-                        <div style="color:#a1a1aa">No photo uploaded.</div>
+                        <div style="color:var(--text-secondary)">No photo uploaded.</div>
                     {% endif %}
                     <label for="photo">Replace Photo (optional)</label>
                     <input type="file" id="photo" name="photo" accept="image/*">
@@ -69,8 +261,97 @@
                 <button type="submit">Save Changes</button>
             </form>
 
-            <div style="margin-top:1rem;"><a href="{{ url_for('view_review', review_id=review['id']) }}" style="color:#a1a1aa">← Back to review</a></div>
+            <div class="back-link"><a href="{{ url_for('view_review', review_id=review['id']) }}">← Back to review</a></div>
         </div>
     </div>
+
+    <script>
+        // Film data from template
+        const films = [
+            {% for film in films %}
+                { id: {{ film['id'] }}, title: '{{ film['title'] }}' },
+            {% endfor %}
+        ];
+
+        const filmSearch = document.getElementById('filmSearch');
+        const filmDropdown = document.getElementById('filmDropdown');
+        const filmInput = document.getElementById('film');
+        const newFilmWrapper = document.getElementById('newFilmWrapperEdit');
+        const newFilm = document.getElementById('newFilmEdit');
+
+        // Set initial display with current film
+        const currentFilmId = parseInt(filmInput.value);
+        if (currentFilmId) {
+            const currentFilm = films.find(f => f.id === currentFilmId);
+            if (currentFilm) {
+                filmSearch.value = currentFilm.title;
+            }
+        }
+
+        // Populate dropdown with all films on focus
+        filmSearch.addEventListener('focus', () => {
+            displayFilmOptions(films);
+        });
+
+        // Filter films on input
+        filmSearch.addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase();
+            const filtered = films.filter(film => 
+                film.title.toLowerCase().includes(query)
+            );
+            displayFilmOptions(filtered);
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            if (e.target !== filmSearch) {
+                filmDropdown.classList.remove('active');
+            }
+        });
+
+        function displayFilmOptions(options) {
+            filmDropdown.innerHTML = '';
+            
+            if (options.length === 0) {
+                const li = document.createElement('li');
+                li.className = 'empty';
+                li.textContent = '➕ No films found - Add new film';
+                li.onclick = () => {
+                    filmSearch.value = '';
+                    filmInput.value = 'new';
+                    newFilmWrapper.style.display = 'block';
+                    newFilm.required = true;
+                    filmSearch.required = false;
+                    filmDropdown.classList.remove('active');
+                    newFilm.focus();
+                };
+                filmDropdown.appendChild(li);
+            } else {
+                options.forEach(film => {
+                    const li = document.createElement('li');
+                    li.textContent = film.title;
+                    li.onclick = () => {
+                        filmSearch.value = film.title;
+                        filmInput.value = film.id;
+                        newFilmWrapper.style.display = 'none';
+                        newFilm.required = false;
+                        filmSearch.required = true;
+                        filmDropdown.classList.remove('active');
+                    };
+                    filmDropdown.appendChild(li);
+                });
+            }
+            
+            filmDropdown.classList.add('active');
+        }
+
+        // Validate that either a film is selected or new film is entered
+        document.querySelector('form').addEventListener('submit', (e) => {
+            if (!filmInput.value && newFilm.value === '') {
+                e.preventDefault();
+                alert('Please select a film or enter a new film title');
+            }
+        });
+    </script>
 </body>
 </html>
