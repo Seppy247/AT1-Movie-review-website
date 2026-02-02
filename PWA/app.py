@@ -23,7 +23,7 @@ def allowed_file(filename):
 # Make sure upload folder exists
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-# -----------------------
+# --------------------------------
 # DATABASE CONNECTION
 # -----------------------
 def get_db_connection():
