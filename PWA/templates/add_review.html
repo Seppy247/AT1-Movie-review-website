@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add Review</title>
+
+    <style>
+        body {
+            text-align: center;
+            font-family: Arial, sans-serif;
+        }
+
+        form {
+            display: inline-block;
+            text-align: left;
+            margin-top: 20px;
+        }
+
+        input, textarea, select, button {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+        }
+
+        button {
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Add a Review</h1>
+
+    <form method="POST" enctype="multipart/form-data">
+    <label>Review Title:</label>
+    <input type="text" name="title" required>
+
+    <label>Rating (1–5):</label>
+    <select name="rating" required>
+        <option value="">Select rating</option>
+        <option value="1">1 - Terrible</option>
+        <option value="2">2</option>
+        <option value="3">3 - Okay</option>
+        <option value="4">4</option>
+        <option value="5">5 - Amazing</option>
+    </select>
+
+    <label>Review:</label>
+    <textarea name="content" rows="5" required></textarea>
+
+    <label>Upload Movie Photo:</label>
+    <input type="file" name="photo" accept="image/*" required>
+
+    <button type="submit">Submit Review</button>
+</form>
+
+
+    <p><a href="/">Back to home</a></p>
+
+</body>
+</html>
