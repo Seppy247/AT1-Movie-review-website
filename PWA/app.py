@@ -148,6 +148,8 @@ def add_review():
 
     conn = get_db_connection()
     films = conn.execute("SELECT id, title FROM films ORDER BY title").fetchall()
+    # convert sqlite3.Row objects to plain dicts so Jinja's tojson can serialize them
+    films = [dict(f) for f in films]
     conn.close()
 
     if request.method == "POST":
@@ -284,6 +286,7 @@ def edit_review(review_id):
 
     conn = get_db_connection()
     films = conn.execute("SELECT id, title FROM films ORDER BY title").fetchall()
+    films = [dict(f) for f in films]
     conn.close()
 
     if request.method == "POST":
