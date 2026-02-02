@@ -337,12 +337,16 @@
 
                 <div class="form-group">
                     <label for="film">Select Film</label>
-                    <select id="film" name="film_id" required>
+                    <select id="film" name="film_id" required onchange="toggleNewFilm(this.value)">
                         <option value="">Select film</option>
                         {% for film in films %}
                             <option value="{{ film['id'] }}">{{ film['title'] }}</option>
                         {% endfor %}
+                        <option value="new">➕ Add new film...</option>
                     </select>
+                    <div id="newFilmWrapper" style="margin-top:0.75rem; display:none;">
+                        <input type="text" id="newFilm" name="new_film" placeholder="Enter new film title" style="width:100%; padding:0.75rem; border-radius:8px; background:var(--bg-secondary); border:2px solid var(--border); color:var(--text-primary);">
+                    </div>
                 </div>
 
                 <div class="form-group">
@@ -407,6 +411,21 @@
                 preview.textContent = stars;
             } else {
                 preview.textContent = '';
+            }
+        }
+
+        function toggleNewFilm(val) {
+            const wrapper = document.getElementById('newFilmWrapper');
+            const newFilm = document.getElementById('newFilm');
+            const select = document.getElementById('film');
+            if (val === 'new') {
+                wrapper.style.display = 'block';
+                newFilm.required = true;
+                select.removeAttribute('required');
+            } else {
+                wrapper.style.display = 'none';
+                newFilm.required = false;
+                select.required = true;
             }
         }
     </script>
