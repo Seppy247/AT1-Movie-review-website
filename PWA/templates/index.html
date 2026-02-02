@@ -1,69 +1,333 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>PWA Reviews</title>
+    <title>CineVibe - Movie Reviews</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        body {
-            text-align: center;
-            font-family: Arial, sans-serif;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
+
+        :root {
+            --bg-primary: #0a0a14;
+            --bg-secondary: #14141f;
+            --bg-card: #1a1a2e;
+            --accent: #eab308;
+            --accent-hover: #fbbf24;
+            --text-primary: #ffffff;
+            --text-secondary: #a1a1aa;
+            --border: #27273a;
+            --success: #22c55e;
+            --error: #ef4444;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-primary) 100%);
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            font-size: 1.75rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.5px;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        /* Navigation */
         nav ul {
             list-style: none;
-            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
         }
+
         nav ul li {
             display: inline;
-            margin: 0 10px;
         }
+
+        nav ul li a {
+            color: var(--text-primary);
+            text-decoration: none;
+            padding: 0.625rem 1.25rem;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            transition: all 0.2s ease;
+            font-size: 0.95rem;
+            font-weight: 500;
+            display: inline-block;
+        }
+
+        nav ul li a:hover {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: var(--bg-primary);
+            transform: translateY(-2px);
+        }
+
+        .user-info {
+            color: var(--text-secondary);
+            padding: 0.625rem 1.25rem;
+            font-size: 0.95rem;
+        }
+
+        /* Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+
+        .hero {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .hero h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--text-primary) 0%, var(--text-secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero p {
+            color: var(--text-secondary);
+            font-size: 1.125rem;
+        }
+
+        .section-title {
+            font-size: 1.875rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        /* Review Cards */
+        .reviews-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
         .review {
-            border: 1px solid #ccc;
-            padding: 10px;
-            margin-bottom: 10px;
-            text-align: left;
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .review::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--accent) 0%, var(--accent-hover) 100%);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .review:hover {
+            transform: translateY(-4px);
+            border-color: var(--accent);
+            box-shadow: 0 10px 30px rgba(234, 179, 8, 0.1);
+        }
+
+        .review:hover::before {
+            transform: scaleX(1);
+        }
+
+        .review h3 {
+            font-size: 1.375rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+            color: var(--text-primary);
+        }
+
+        .review-rating {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .stars {
+            color: var(--accent);
+            font-size: 1.125rem;
+        }
+
+        .rating-text {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            font-weight: 600;
+        }
+
+        .review p {
+            color: var(--text-secondary);
+            line-height: 1.7;
+            margin-bottom: 1rem;
+        }
+
+        .review-meta {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            font-style: italic;
+            border-top: 1px solid var(--border);
+            padding-top: 1rem;
+            margin-top: 1rem;
+        }
+
+        .review-meta strong {
+            color: var(--accent);
+            font-style: normal;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header {
+                padding: 1rem;
+            }
+
+            .logo {
+                font-size: 1.5rem;
+            }
+
+            nav ul {
+                gap: 0.5rem;
+            }
+
+            nav ul li a {
+                padding: 0.5rem 1rem;
+                font-size: 0.875rem;
+            }
+
+            .container {
+                padding: 2rem 1rem;
+            }
+
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .hero p {
+                font-size: 1rem;
+            }
+
+            .reviews-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--text-secondary);
+        }
+
+        .empty-state svg {
+            width: 120px;
+            height: 120px;
+            margin-bottom: 1.5rem;
+            opacity: 0.3;
         }
     </style>
 </head>
 
 <body>
 
-    <h1>Movie Review App</h1>
+    <div class="header">
+        <div class="header-content">
+            <div class="logo">🎬 CineVibe</div>
+            
+            <nav>
+                <ul>
+                    <li><a href="{{ url_for('home') }}">Home</a></li>
+                    <li><a href="{{ url_for('add_review') }}">Add Review</a></li>
 
-    <p>Welcome to the review app.</p>
-
-    <hr>
-
-    <!-- Navigation -->
-    <nav>
-        <ul>
-            <li><a href="{{ url_for('home') }}">Home</a></li>
-            <li><a href="{{ url_for('add_review') }}">Add Review</a></li>
-
-            {% if session.username %}
-                <li>Logged in as {{ session.username }}</li>
-                <li><a href="{{ url_for('logout') }}">Logout</a></li>
-            {% else %}
-                <li><a href="{{ url_for('login') }}">Login</a></li>
-                <li><a href="{{ url_for('register') }}">Register</a></li>
-            {% endif %}
-        </ul>
-    </nav>
-
-    <hr>
-
-    <h2>Recent Reviews</h2>
-
-    <!-- Loop through reviews sent from Flask -->
-    {% for review in reviews %}
-        <div class="review">
-            <h3>{{ review["title"] }}</h3>
-            <p><strong>Rating:</strong> {{ review["rating"] }}/5</p>
-            <p>{{ review["content"] }}</p>
-            <p><em>Reviewed by {{ review["username"] }} on {{ review["date"] }}</em></p>
+                    {% if session.username %}
+                        <li class="user-info">👤 {{ session.username }}</li>
+                        <li><a href="{{ url_for('logout') }}">Logout</a></li>
+                    {% else %}
+                        <li><a href="{{ url_for('login') }}">Login</a></li>
+                        <li><a href="{{ url_for('register') }}">Register</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
         </div>
-    {% endfor %}
+    </div>
+
+    <div class="container">
+        <div class="hero">
+            <h1>Discover & Share Movie Reviews</h1>
+            <p>Your ultimate destination for honest movie opinions</p>
+        </div>
+
+        <h2 class="section-title">Recent Reviews</h2>
+
+        {% if reviews %}
+            <div class="reviews-grid">
+                {% for review in reviews %}
+                    <div class="review">
+                        <h3>{{ review["title"] }}</h3>
+                        <div class="review-rating">
+                            <span class="stars">
+                                {% for i in range(review["rating"]|int) %}★{% endfor %}
+                                {% for i in range(5 - review["rating"]|int) %}☆{% endfor %}
+                            </span>
+                            <span class="rating-text">{{ review["rating"] }}/5</span>
+                        </div>
+                        <p>{{ review["content"] }}</p>
+                        <div class="review-meta">
+                            Reviewed by <strong>{{ review["username"] }}</strong> on {{ review["date"] }}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z" />
+                </svg>
+                <p>No reviews yet. Be the first to share your thoughts!</p>
+            </div>
+        {% endif %}
+    </div>
 
 </body>
 </html>

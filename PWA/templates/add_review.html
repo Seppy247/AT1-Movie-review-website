@@ -1,60 +1,320 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Add Review</title>
-
+    <title>Add Review - CineVibe</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0a0a14;
+            --bg-secondary: #14141f;
+            --bg-card: #1a1a2e;
+            --accent: #eab308;
+            --accent-hover: #fbbf24;
+            --text-primary: #ffffff;
+            --text-secondary: #a1a1aa;
+            --border: #27273a;
+        }
+
         body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-primary) 100%);
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .header-content {
+            max-width: 800px;
+            margin: 0 auto;
             text-align: center;
-            font-family: Arial, sans-serif;
         }
 
-        form {
-            display: inline-block;
-            text-align: left;
-            margin-top: 20px;
+        .logo {
+            font-size: 1.75rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.5px;
         }
 
-        input, textarea, select, button {
+        /* Container */
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+
+        .page-title {
+            font-size: 2.25rem;
+            font-weight: 800;
+            text-align: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .page-subtitle {
+            text-align: center;
+            color: var(--text-secondary);
+            margin-bottom: 3rem;
+        }
+
+        /* Form */
+        .form-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+        }
+
+        input[type="text"],
+        textarea,
+        select {
             width: 100%;
-            padding: 8px;
-            margin-top: 5px;
+            padding: 0.875rem 1rem;
+            background: var(--bg-secondary);
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            font-family: inherit;
+            transition: all 0.2s ease;
         }
 
-        button {
-            margin-top: 15px;
+        input[type="text"]:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(234, 179, 8, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 150px;
+        }
+
+        select {
+            cursor: pointer;
+        }
+
+        /* File input styling */
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            width: 100%;
+        }
+
+        input[type="file"] {
+            position: absolute;
+            left: -9999px;
+        }
+
+        .file-input-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            padding: 1rem;
+            background: var(--bg-secondary);
+            border: 2px dashed var(--border);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .file-input-label:hover {
+            border-color: var(--accent);
+            background: var(--bg-primary);
+            color: var(--accent);
+        }
+
+        .file-name {
+            margin-top: 0.5rem;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+
+        /* Button */
+        button[type="submit"] {
+            width: 100%;
+            padding: 1rem 2rem;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%);
+            border: none;
+            border-radius: 10px;
+            color: var(--bg-primary);
+            font-size: 1.05rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 1rem;
+        }
+
+        button[type="submit"]:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(234, 179, 8, 0.3);
+        }
+
+        button[type="submit"]:active {
+            transform: translateY(0);
+        }
+
+        /* Back link */
+        .back-link {
+            text-align: center;
+            margin-top: 2rem;
+        }
+
+        .back-link a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.2s ease;
+            font-size: 0.95rem;
+        }
+
+        .back-link a:hover {
+            color: var(--accent);
+        }
+
+        /* Rating stars preview */
+        .rating-preview {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+            color: var(--accent);
+            font-size: 1.25rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 2rem 1rem;
+            }
+
+            .form-card {
+                padding: 1.5rem;
+            }
+
+            .page-title {
+                font-size: 1.875rem;
+            }
         }
     </style>
 </head>
 <body>
 
-    <h1>Add a Review</h1>
+    <div class="header">
+        <div class="header-content">
+            <div class="logo">🎬 CineVibe</div>
+        </div>
+    </div>
 
-    <form method="POST" enctype="multipart/form-data">
-    <label>Review Title:</label>
-    <input type="text" name="title" required>
+    <div class="container">
+        <h1 class="page-title">Add a Review</h1>
+        <p class="page-subtitle">Share your thoughts on your favorite movies</p>
 
-    <label>Rating (1–5):</label>
-    <select name="rating" required>
-        <option value="">Select rating</option>
-        <option value="1">1 - Terrible</option>
-        <option value="2">2</option>
-        <option value="3">3 - Okay</option>
-        <option value="4">4</option>
-        <option value="5">5 - Amazing</option>
-    </select>
+        <div class="form-card">
+            <form method="POST" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="title">Movie Title</label>
+                    <input type="text" id="title" name="title" placeholder="Enter movie title" required>
+                </div>
 
-    <label>Review:</label>
-    <textarea name="content" rows="5" required></textarea>
+                <div class="form-group">
+                    <label for="rating">Rating</label>
+                    <select id="rating" name="rating" required onchange="updateRatingPreview(this.value)">
+                        <option value="">Select your rating</option>
+                        <option value="1">1 - Terrible</option>
+                        <option value="2">2 - Poor</option>
+                        <option value="3">3 - Okay</option>
+                        <option value="4">4 - Good</option>
+                        <option value="5">5 - Amazing</option>
+                    </select>
+                    <div class="rating-preview" id="ratingPreview"></div>
+                </div>
 
-    <label>Upload Movie Photo:</label>
-    <input type="file" name="photo" accept="image/*" required>
+                <div class="form-group">
+                    <label for="content">Your Review</label>
+                    <textarea id="content" name="content" placeholder="What did you think about this movie?" required></textarea>
+                </div>
 
-    <button type="submit">Submit Review</button>
-</form>
+                <div class="form-group">
+                    <label>Movie Photo</label>
+                    <div class="file-input-wrapper">
+                        <input type="file" id="photo" name="photo" accept="image/*" required onchange="updateFileName(this)">
+                        <label for="photo" class="file-input-label">
+                            <span>📷</span>
+                            <span>Choose a photo</span>
+                        </label>
+                    </div>
+                    <div class="file-name" id="fileName"></div>
+                </div>
 
+                <button type="submit">🎬 Submit Review</button>
+            </form>
+        </div>
 
-    <p><a href="/">Back to home</a></p>
+        <div class="back-link">
+            <a href="/">← Back to home</a>
+        </div>
+    </div>
+
+    <script>
+        function updateFileName(input) {
+            const fileName = document.getElementById('fileName');
+            if (input.files && input.files[0]) {
+                fileName.textContent = '📎 ' + input.files[0].name;
+            } else {
+                fileName.textContent = '';
+            }
+        }
+
+        function updateRatingPreview(rating) {
+            const preview = document.getElementById('ratingPreview');
+            if (rating) {
+                let stars = '';
+                for (let i = 0; i < parseInt(rating); i++) {
+                    stars += '★';
+                }
+                for (let i = parseInt(rating); i < 5; i++) {
+                    stars += '☆';
+                }
+                preview.textContent = stars;
+            } else {
+                preview.textContent = '';
+            }
+        }
+    </script>
 
 </body>
 </html>

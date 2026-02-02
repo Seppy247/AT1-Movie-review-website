@@ -1,35 +1,347 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Register</title>
-
+    <title>Register - CineVibe</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0a0a14;
+            --bg-secondary: #14141f;
+            --bg-card: #1a1a2e;
+            --accent: #eab308;
+            --accent-hover: #fbbf24;
+            --text-primary: #ffffff;
+            --text-secondary: #a1a1aa;
+            --border: #27273a;
+        }
+
         body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        /* Animated background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(234, 179, 8, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(234, 179, 8, 0.05) 0%, transparent 50%);
+            z-index: -1;
+        }
+
+        .register-container {
+            width: 100%;
+            max-width: 450px;
+        }
+
+        .logo-section {
             text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .logo {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.5px;
+            margin-bottom: 0.5rem;
+        }
+
+        .logo-subtitle {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 2.5rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            font-size: 1.875rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+            font-size: 0.95rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+        }
+
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            background: var(--bg-secondary);
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            font-family: inherit;
+            transition: all 0.2s ease;
+        }
+
+        input[type="text"]:focus,
+        input[type="password"]:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(234, 179, 8, 0.1);
+        }
+
+        input::placeholder {
+            color: var(--text-secondary);
+            opacity: 0.6;
+        }
+
+        button[type="submit"] {
+            width: 100%;
+            padding: 1rem 2rem;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%);
+            border: none;
+            border-radius: 10px;
+            color: var(--bg-primary);
+            font-size: 1.05rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 0.5rem;
+        }
+
+        button[type="submit"]:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(234, 179, 8, 0.3);
+        }
+
+        button[type="submit"]:active {
+            transform: translateY(0);
+        }
+
+        .divider {
+            text-align: center;
+            margin: 2rem 0 1.5rem;
+            position: relative;
+        }
+
+        .divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: var(--border);
+        }
+
+        .divider span {
+            position: relative;
+            background: var(--bg-card);
+            padding: 0 1rem;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        .login-link {
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .login-link a {
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.2s ease;
+        }
+
+        .login-link a:hover {
+            color: var(--accent-hover);
+            text-decoration: underline;
+        }
+
+        /* Icon styling */
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+            font-size: 1.125rem;
+        }
+
+        .input-wrapper input {
+            padding-left: 2.75rem;
+        }
+
+        /* Password strength indicator */
+        .password-strength {
+            margin-top: 0.5rem;
+            height: 4px;
+            background: var(--bg-secondary);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .password-strength-bar {
+            height: 100%;
+            width: 0;
+            background: var(--accent);
+            transition: width 0.3s ease, background 0.3s ease;
+        }
+
+        .password-strength-bar.weak {
+            width: 33%;
+            background: #ef4444;
+        }
+
+        .password-strength-bar.medium {
+            width: 66%;
+            background: #f59e0b;
+        }
+
+        .password-strength-bar.strong {
+            width: 100%;
+            background: #22c55e;
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .card {
+                padding: 2rem 1.5rem;
+            }
+
+            .logo {
+                font-size: 2rem;
+            }
+
+            h1 {
+                font-size: 1.625rem;
+            }
         }
     </style>
 </head>
-
 <body>
 
-    <h1>Register</h1>
+    <div class="register-container">
+        <div class="logo-section">
+            <div class="logo">🎬 CineVibe</div>
+            <p class="logo-subtitle">Join the movie community</p>
+        </div>
 
-    <form method="POST">
+        <div class="card">
+            <h1>Create Account</h1>
+            <p class="subtitle">Start sharing your movie reviews today</p>
 
-        <label>Username:</label><br>
-        <input type="text" name="username" required><br><br>
+            <form method="POST">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <div class="input-wrapper">
+                        <span class="input-icon">👤</span>
+                        <input type="text" id="username" name="username" placeholder="Choose a username" required>
+                    </div>
+                </div>
 
-        <label>Password:</label><br>
-        <input type="password" name="password" required><br><br>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <div class="input-wrapper">
+                        <span class="input-icon">🔒</span>
+                        <input type="password" id="password" name="password" placeholder="Create a password" required oninput="checkPasswordStrength(this.value)">
+                    </div>
+                    <div class="password-strength">
+                        <div class="password-strength-bar" id="strengthBar"></div>
+                    </div>
+                </div>
 
-        <button type="submit">Create account</button>
+                <button type="submit">Create Account</button>
+            </form>
 
-    </form>
+            <div class="divider">
+                <span>or</span>
+            </div>
 
-    <p>
-        Already have an account?
-        <a href="/login">Login here</a>
-    </p>
+            <p class="login-link">
+                Already have an account?
+                <a href="/login">Login here</a>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        function checkPasswordStrength(password) {
+            const strengthBar = document.getElementById('strengthBar');
+            
+            if (password.length === 0) {
+                strengthBar.className = 'password-strength-bar';
+                return;
+            }
+            
+            let strength = 0;
+            
+            // Check password length
+            if (password.length >= 8) strength++;
+            if (password.length >= 12) strength++;
+            
+            // Check for mixed case
+            if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength++;
+            
+            // Check for numbers
+            if (/\d/.test(password)) strength++;
+            
+            // Check for special characters
+            if (/[^a-zA-Z0-9]/.test(password)) strength++;
+            
+            // Set strength class
+            if (strength <= 2) {
+                strengthBar.className = 'password-strength-bar weak';
+            } else if (strength <= 3) {
+                strengthBar.className = 'password-strength-bar medium';
+            } else {
+                strengthBar.className = 'password-strength-bar strong';
+            }
+        }
+    </script>
 
 </body>
 </html>
