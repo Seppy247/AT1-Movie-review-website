@@ -329,6 +329,7 @@
 
         <div class="form-card">
             <form method="POST" enctype="multipart/form-data">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <div class="form-group">
                     <label for="title">Movie Title</label>
                     <input type="text" id="title" name="title" placeholder="Enter movie title" required>
