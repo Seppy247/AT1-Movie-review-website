@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session, flash
+from flask import Flask, render_template, request, redirect, url_for, session, flash, abort
 import sqlite3
 import os
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -9,21 +9,34 @@ from functools import wraps
 # CREATE FLASK APP
 # -----------------------
 app = Flask(__name__)
-app.secret_key = "supersecretkey"  # Change this to a random secret key in production
+app.secret_key = os.environ.get("FLASK_SECRET_KEY", "dev-key")  # set FLASK_SECRET_KEY in env for production
 
 # -----------------------
 # FILE UPLOAD SETTINGS
 # -----------------------
-UPLOAD_FOLDER = os.path.join("static", "uploads")
+app.config["UPLOAD_FOLDER"] = os.path.join(app.root_path, "static", "uploads")
+app.config["MAX_CONTENT_LENGTH"] = 5 * 1024 * 1024  # 5 MB max upload
 ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif"}
-app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
 def allowed_file(filename):
     """Check if uploaded file has an allowed extension."""
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
 # Make sure upload folder exists
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
+
+# Optional: CSRF protection if flask-wtf is installed
+try:
+    from flask_wtf import CSRFProtect
+    csrf = CSRFProtect(app)
+    try:
+        from flask_wtf.csrf import generate_csrf
+        app.jinja_env.globals['csrf_token'] = lambda: generate_csrf()
+    except Exception:
+        app.jinja_env.globals['csrf_token'] = lambda: ''
+except Exception:
+    # flask-wtf not installed, consider `pip install flask-wtf` for CSRF protection
+    app.jinja_env.globals['csrf_token'] = lambda: ''
 
 # -----------------------
 # DATABASE CONNECTION
@@ -58,14 +71,17 @@ def home():
     try:
         conn = get_db_connection()
         reviews = conn.execute("""
-            SELECT reviews.title,
+            SELECT reviews.id,
+                   reviews.title,
                    reviews.rating,
                    reviews.content,
                    reviews.date,
                    reviews.photo,
-                   users.username
+                   users.username,
+                   films.title AS film_title
             FROM reviews
             JOIN users ON reviews.user_id = users.id
+            JOIN films ON reviews.film_id = films.id
             ORDER BY reviews.id DESC
         """).fetchall()
         conn.close()
@@ -180,15 +196,44 @@ def logout():
 @login_required
 def add_review():
     """Allow logged-in users to add a review with a photo."""
+    conn = get_db_connection()
+    films = conn.execute("SELECT id, title FROM films ORDER BY title").fetchall()
+    conn.close()
+
     if request.method == "POST":
         title = request.form.get("title", "").strip()
         rating = request.form.get("rating", "")
         content = request.form.get("content", "").strip()
+        film_id = request.form.get("film_id", "")
         file = request.files.get("photo")
 
         # Validation
-        if not title or not rating or not content:
+        if not title or not rating or not content or not film_id:
             flash("Please fill in all required fields.", "error")
+            return redirect(url_for("add_review"))
+
+        # Validate rating
+        try:
+            rating = int(rating)
+            if rating < 1 or rating > 5:
+                raise ValueError
+        except ValueError:
+            flash("Rating must be an integer between 1 and 5.", "error")
+            return redirect(url_for("add_review"))
+
+        # Validate film_id
+        try:
+            film_id = int(film_id)
+        except ValueError:
+            flash("Invalid film selection.", "error")
+            return redirect(url_for("add_review"))
+
+        # Verify film exists
+        conn = get_db_connection()
+        film = conn.execute("SELECT id FROM films WHERE id = ?", (film_id,)).fetchone()
+        conn.close()
+        if not film:
+            flash("Selected film not found.", "error")
             return redirect(url_for("add_review"))
 
         if not file:
@@ -212,8 +257,8 @@ def add_review():
             conn = get_db_connection()
             conn.execute("""
                 INSERT INTO reviews (title, rating, content, date, user_id, film_id, photo)
-                VALUES (?, ?, ?, date('now'), ?, 1, ?)
-            """, (title, rating, content, session["user_id"], filename))
+                VALUES (?, ?, ?, date('now'), ?, ?, ?)
+            """, (title, rating, content, session["user_id"], film_id, filename))
             conn.commit()
             conn.close()
 
@@ -224,7 +269,145 @@ def add_review():
             flash(f"Error adding review: {str(e)}", "error")
             return redirect(url_for("add_review"))
 
-    return render_template("add_review.html")
+    return render_template("add_review.html", films=films)
+
+# -----------------------
+# Review helpers & CRUD
+# -----------------------
+
+def get_review(review_id):
+    conn = get_db_connection()
+    review = conn.execute("""
+        SELECT reviews.*, users.username, films.title AS film_title
+        FROM reviews
+        JOIN users ON reviews.user_id = users.id
+        JOIN films ON reviews.film_id = films.id
+        WHERE reviews.id = ?
+    """, (review_id,)).fetchone()
+    conn.close()
+    return review
+
+
+@app.route("/review/<int:review_id>")
+def view_review(review_id):
+    review = get_review(review_id)
+    if not review:
+        abort(404)
+    return render_template("review.html", review=review)
+
+
+@app.route("/review/<int:review_id>/edit", methods=["GET", "POST"])
+@login_required
+def edit_review(review_id):
+    review = get_review(review_id)
+    if not review:
+        abort(404)
+    if review["user_id"] != session.get("user_id"):
+        flash("You do not have permission to edit this review.", "error")
+        return redirect(url_for("home"))
+
+    conn = get_db_connection()
+    films = conn.execute("SELECT id, title FROM films ORDER BY title").fetchall()
+    conn.close()
+
+    if request.method == "POST":
+        title = request.form.get("title", "").strip()
+        rating = request.form.get("rating", "")
+        content = request.form.get("content", "").strip()
+        film_id = request.form.get("film_id", "")
+        file = request.files.get("photo")
+
+        if not title or not rating or not content or not film_id:
+            flash("Please fill in all required fields.", "error")
+            return redirect(url_for("edit_review", review_id=review_id))
+
+        try:
+            rating = int(rating)
+            if rating < 1 or rating > 5:
+                raise ValueError
+        except ValueError:
+            flash("Rating must be an integer between 1 and 5.", "error")
+            return redirect(url_for("edit_review", review_id=review_id))
+
+        try:
+            film_id = int(film_id)
+        except ValueError:
+            flash("Invalid film selection.", "error")
+            return redirect(url_for("edit_review", review_id=review_id))
+
+        conn = get_db_connection()
+        film = conn.execute("SELECT id FROM films WHERE id = ?", (film_id,)).fetchone()
+        conn.close()
+        if not film:
+            flash("Selected film not found.", "error")
+            return redirect(url_for("edit_review", review_id=review_id))
+
+        filename = review["photo"]
+        # Handle new file upload
+        if file and file.filename:
+            if allowed_file(file.filename):
+                new_filename = secure_filename(file.filename)
+                import time
+                new_filename = f"{int(time.time())}_{new_filename}"
+                file.save(os.path.join(app.config["UPLOAD_FOLDER"], new_filename))
+                # remove old file if exists
+                if filename:
+                    old_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+                    try:
+                        if os.path.exists(old_path):
+                            os.remove(old_path)
+                    except Exception:
+                        pass
+                filename = new_filename
+            else:
+                flash("Invalid file type. Please upload an image (png, jpg, jpeg, gif).", "error")
+                return redirect(url_for("edit_review", review_id=review_id))
+
+        try:
+            conn = get_db_connection()
+            conn.execute("""
+                UPDATE reviews
+                SET title = ?, rating = ?, content = ?, film_id = ?, photo = ?
+                WHERE id = ?
+            """, (title, rating, content, film_id, filename, review_id))
+            conn.commit()
+            conn.close()
+            flash("Review updated successfully!", "success")
+            return redirect(url_for("view_review", review_id=review_id))
+        except Exception as e:
+            flash(f"Error updating review: {str(e)}", "error")
+            return redirect(url_for("edit_review", review_id=review_id))
+
+    return render_template("edit_review.html", review=review, films=films)
+
+
+@app.route("/review/<int:review_id>/delete", methods=["POST"])
+@login_required
+def delete_review(review_id):
+    review = get_review(review_id)
+    if not review:
+        abort(404)
+    if review["user_id"] != session.get("user_id"):
+        flash("You do not have permission to delete this review.", "error")
+        return redirect(url_for("home"))
+    try:
+        # delete photo file
+        if review["photo"]:
+            p = os.path.join(app.config["UPLOAD_FOLDER"], review["photo"])
+            try:
+                if os.path.exists(p):
+                    os.remove(p)
+            except Exception:
+                pass
+        conn = get_db_connection()
+        conn.execute("DELETE FROM reviews WHERE id = ?", (review_id,))
+        conn.commit()
+        conn.close()
+        flash("Review deleted.", "success")
+        return redirect(url_for("home"))
+    except Exception as e:
+        flash(f"Error deleting review: {str(e)}", "error")
+        return redirect(url_for("home"))
 
 # -----------------------
 # ERROR HANDLERS

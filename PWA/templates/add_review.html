@@ -335,6 +335,16 @@
                 </div>
 
                 <div class="form-group">
+                    <label for="film">Select Film</label>
+                    <select id="film" name="film_id" required>
+                        <option value="">Select film</option>
+                        {% for film in films %}
+                            <option value="{{ film['id'] }}">{{ film['title'] }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
                     <label for="rating">Rating</label>
                     <select id="rating" name="rating" required onchange="updateRatingPreview(this.value)">
                         <option value="">Select your rating</option>

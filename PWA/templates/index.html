@@ -403,7 +403,8 @@
                         {% if review["photo"] %}
                             <img src="{{ url_for('static', filename='uploads/' + review['photo']) }}" alt="{{ review['title'] }}" class="review-photo">
                         {% endif %}
-                        <h3>{{ review["title"] }}</h3>
+                        <h3><a href="{{ url_for('view_review', review_id=review['id']) }}" style="color:inherit; text-decoration:none;">{{ review["title"] }}</a></h3>
+                        <div class="rating-text">Film: <strong>{{ review["film_title"] }}</strong></div>
                         <div class="review-rating">
                             <span class="stars">
                                 {% for i in range(review["rating"]|int) %}★{% endfor %}
