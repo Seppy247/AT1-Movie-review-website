@@ -67,7 +67,8 @@ def home():
     """Display all reviews on the homepage with user info."""
     conn = get_db_connection()
     reviews = conn.execute("""
-        SELECT reviews.title,
+        SELECT reviews.id,
+               reviews.title,
                reviews.rating,
                reviews.content,
                reviews.date,
@@ -364,6 +365,42 @@ def edit_review(review_id):
             return redirect(url_for("edit_review", review_id=review_id))
 
     return render_template("edit_review.html", review=review, films=films)
+
+# -----------------------
+# DELETE REVIEW PAGE
+# -----------------------
+@app.route("/delete-review/<int:review_id>", methods=["POST"])
+def delete_review(review_id):
+    """Allow users to delete their own reviews."""
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+
+    conn = get_db_connection()
+    review = conn.execute("""
+        SELECT * FROM reviews WHERE id = ?
+    """, (review_id,)).fetchone()
+    conn.close()
+
+    if not review:
+        flash("Review not found.", "error")
+        return redirect(url_for("home"))
+
+    if review["user_id"] != session["user_id"]:
+        flash("You can only delete your own reviews.", "error")
+        return redirect(url_for("home"))
+
+    try:
+        conn = get_db_connection()
+        conn.execute("DELETE FROM reviews WHERE id = ?", (review_id,))
+        conn.commit()
+        conn.close()
+
+        flash("Review deleted successfully!", "success")
+        return redirect(url_for("home"))
+
+    except Exception as e:
+        flash(f"Error deleting review: {str(e)}", "error")
+        return redirect(url_for("home"))
 
 # -----------------------
 # RUN APP
