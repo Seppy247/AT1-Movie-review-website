@@ -13,14 +13,14 @@ app.secret_key = "supersecretkey"  # Required for sessions
 # -----------------------
 # FILE UPLOAD SETTINGS
 # -----------------------
-UPLOAD_FOLDER = os.path.join("static", "uploads")
+UPLOAD_FOLDER = os.path.join(app.root_path, "static", "uploads")
 ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif"}
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
 def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
-# Make sure upload folder exists
+# Make sure upload folder exists (use absolute path inside app static)
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 # Optional: CSRF helper for templates (works if Flask-WTF is installed)
