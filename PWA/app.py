@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 import sqlite3
 import os
+import uuid
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 
@@ -8,7 +9,8 @@ from werkzeug.utils import secure_filename
 # CREATE FLASK APP
 # -----------------------
 app = Flask(__name__)
-app.secret_key = "supersecretkey"  # Required for sessions
+# Prefer an environment-provided secret in production
+app.secret_key = os.environ.get("SECRET_KEY", "supersecretkey")  # Required for sessions
 
 # -----------------------
 # FILE UPLOAD SETTINGS
@@ -16,6 +18,12 @@ app.secret_key = "supersecretkey"  # Required for sessions
 UPLOAD_FOLDER = os.path.join(app.root_path, "static", "uploads")
 ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif"}
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
+app.config["MAX_CONTENT_LENGTH"] = 5 * 1024 * 1024  # 5 MB upload limit
+
+# Session cookie hardening (secure in production)
+app.config["SESSION_COOKIE_HTTPONLY"] = True
+app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+app.config["SESSION_COOKIE_SECURE"] = os.environ.get("FLASK_ENV") == "production"
 
 def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -33,20 +41,6 @@ try:
     except Exception:
         app.jinja_env.globals['csrf_token'] = lambda: ''
 except Exception:
-    app.jinja_env.globals['csrf_token'] = lambda: ''
-
-# Optional: CSRF protection (Flask-WTF)
-try:
-    from flask_wtf import CSRFProtect
-    csrf = CSRFProtect(app)
-    try:
-        from flask_wtf.csrf import generate_csrf
-        app.jinja_env.globals['csrf_token'] = lambda: generate_csrf()
-    except Exception:
-        # generate_csrf not available, provide empty token
-        app.jinja_env.globals['csrf_token'] = lambda: ''
-except Exception:
-    # Flask-WTF not installed; provide a no-op csrf_token for templates
     app.jinja_env.globals['csrf_token'] = lambda: ''
 
 # -----------------------
@@ -229,10 +223,11 @@ def add_review():
         # Handle file upload
         if file and file.filename:
             if allowed_file(file.filename):
-                filename = secure_filename(file.filename)
-                import time
-                filename = f"{int(time.time())}_{filename}"
-                file.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
+                orig_name = secure_filename(file.filename)
+                ext = orig_name.rsplit('.', 1)[1].lower()
+                filename = f"{uuid.uuid4().hex}.{ext}"
+                save_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+                file.save(save_path)
             else:
                 flash("Invalid file type. Please upload an image (png, jpg, jpeg, gif).", "error")
                 return redirect(url_for("add_review"))
@@ -366,10 +361,21 @@ def edit_review(review_id):
         filename = review["photo"]
         if file and file.filename:
             if allowed_file(file.filename):
-                filename = secure_filename(file.filename)
-                import time
-                filename = f"{int(time.time())}_{filename}"
-                file.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
+                orig_name = secure_filename(file.filename)
+                ext = orig_name.rsplit('.', 1)[1].lower()
+                new_filename = f"{uuid.uuid4().hex}.{ext}"
+                save_path = os.path.join(app.config["UPLOAD_FOLDER"], new_filename)
+                # delete old file if present
+                old = review.get("photo")
+                if old:
+                    old_path = os.path.join(app.config["UPLOAD_FOLDER"], old)
+                    try:
+                        if os.path.exists(old_path):
+                            os.remove(old_path)
+                    except Exception:
+                        pass
+                file.save(save_path)
+                filename = new_filename
             else:
                 flash("Invalid file type. Please upload an image (png, jpg, jpeg, gif).", "error")
                 return redirect(url_for("edit_review", review_id=review_id))
