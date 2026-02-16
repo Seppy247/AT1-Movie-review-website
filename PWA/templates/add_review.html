@@ -462,7 +462,21 @@
 
     <script>
         // Film data from template (JSON-encoded for safety)
-        const films = {{ films | tojson | safe }};
+        let films = {{ films | tojson | safe }};
+
+        // Deduplicate films by title (case-insensitive) to avoid showing duplicates
+        (function dedupeFilms() {
+            const seen = new Set();
+            const unique = [];
+            for (const f of films) {
+                const key = String(f.title || '').trim().toLowerCase();
+                if (!seen.has(key)) {
+                    seen.add(key);
+                    unique.push(f);
+                }
+            }
+            films = unique;
+        })();
 
         const filmSearch = document.getElementById('filmSearch');
         const filmDropdown = document.getElementById('filmDropdown');

@@ -54,6 +54,11 @@ It uses Jinja2 templating to dynamically display data from Flask.
             min-height: 100vh; /* Minimum full viewport height */
         }
 
+        /* Center main container text per user request */
+        .container {
+            text-align: center;
+        }
+
         /* ================================================================
            SECTION 3: HEADER & NAVIGATION
            ================================================================
@@ -133,6 +138,7 @@ It uses Jinja2 templating to dynamically display data from Flask.
             position: relative;
             overflow: hidden;
             cursor: pointer;  /* Shows it's clickable */
+            text-align: center;
         }
 
         /* Animated gold bar at top of card (hidden by default) */
@@ -260,7 +266,7 @@ It uses Jinja2 templating to dynamically display data from Flask.
          SECTION 7: HEADER WITH NAVIGATION
          ================================================================
          Navigation bar shows different options based on login status.
-         Uses Jinja2 {% if session.username %} to check login state.
+         Uses Jinja2 {% raw %}{% if session.username %}{% endraw %} to check login state.
          ================================================================ -->
 
     <div class="header">
@@ -326,13 +332,13 @@ It uses Jinja2 templating to dynamically display data from Flask.
         </div>
 
         <!-- Section Title -->
-        <h2 class="section-title">Recent Reviews</h2>
+            <h2 class="section-title">Recent Reviews</h2>
 
         <!-- ================================================================
              SECTION 9: REVIEWS GRID
              ================================================================
              Loops through reviews from database and displays each as a card.
-             Uses Jinja2 {% for review in reviews %} loop.
+             Uses Jinja2 {% raw %}{% for review in reviews %}{% endraw %} loop.
              Shows empty state if no reviews exist.
              ================================================================ -->
 
