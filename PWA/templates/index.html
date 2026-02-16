@@ -1,143 +1,127 @@
+<!-- 
+============================================================================
+CINEVIBE - INDEX.HTML (HOMEPAGE)
+Location: templates/index.html
+============================================================================
+This is the main homepage that displays all movie reviews in a grid layout.
+It uses Jinja2 templating to dynamically display data from Flask.
+============================================================================
+-->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CineVibe - Movie Reviews</title>
+    
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        /* ================================================================
+           SECTION 1: CSS VARIABLES
+           ================================================================
+           CSS custom properties (variables) make theming easy.
+           Change these values to update the entire color scheme.
+           ================================================================ */
+        
+        :root {
+            --bg-primary: #0a0a14;      /* Main background (dark blue-black) */
+            --bg-secondary: #14141f;    /* Secondary background (slightly lighter) */
+            --bg-card: #1a1a2e;         /* Card background */
+            --accent: #eab308;          /* Gold accent color */
+            --accent-hover: #fbbf24;    /* Lighter gold for hover effects */
+            --text-primary: #ffffff;    /* White text */
+            --text-secondary: #a1a1aa;  /* Gray text for less important info */
+            --border: #27273a;          /* Border color */
         }
 
-        :root {
-            --bg-primary: #0a0a14;
-            --bg-secondary: #14141f;
-            --bg-card: #1a1a2e;
-            --accent: #eab308;
-            --accent-hover: #fbbf24;
-            --text-primary: #ffffff;
-            --text-secondary: #a1a1aa;
-            --border: #27273a;
+        /* ================================================================
+           SECTION 2: GLOBAL STYLES
+           ================================================================
+           Reset default browser styles and set base styles.
+           ================================================================ */
+        
+        * {
+            margin: 0;           /* Remove default margins */
+            padding: 0;          /* Remove default padding */
+            box-sizing: border-box;  /* Include padding/border in width calculations */
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: var(--bg-primary);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-primary);  /* Use CSS variable */
             color: var(--text-primary);
-            line-height: 1.6;
-            min-height: 100vh;
+            line-height: 1.6;  /* Space between lines for readability */
+            min-height: 100vh; /* Minimum full viewport height */
         }
 
-        /* Header */
+        /* ================================================================
+           SECTION 3: HEADER & NAVIGATION
+           ================================================================
+           Sticky header with logo and navigation links.
+           Navigation changes based on login status (using Jinja2 if/else).
+           ================================================================ */
+
         .header {
             background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-primary) 100%);
             padding: 1.5rem 2rem;
             border-bottom: 1px solid var(--border);
-            position: sticky;
+            position: sticky;   /* Stays at top when scrolling */
             top: 0;
-            z-index: 100;
-            backdrop-filter: blur(10px);
-        }
-
-        .header-content {
-            max-width: 1200px;
-            margin: 0 auto;
+            z-index: 100;       /* Appears above other content */
+            backdrop-filter: blur(10px);  /* Blur effect behind header */
         }
 
         .logo {
             font-size: 1.75rem;
             font-weight: 800;
+            /* Gradient text effect using background-clip */
             background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            letter-spacing: -0.5px;
-            margin-bottom: 1rem;
             text-align: center;
+            margin-bottom: 1rem;
         }
 
-        /* Navigation */
         nav ul {
-            list-style: none;
+            list-style: none;  /* Remove bullet points */
             display: flex;
             justify-content: center;
             align-items: center;
-            flex-wrap: wrap;
+            flex-wrap: wrap;  /* Wrap to next line on small screens */
             gap: 1rem;
-        }
-
-        nav ul li {
-            display: inline;
         }
 
         nav ul li a {
             color: var(--text-primary);
-            text-decoration: none;
+            text-decoration: none;  /* Remove underline */
             padding: 0.625rem 1.25rem;
             border-radius: 8px;
             border: 1px solid var(--border);
-            transition: all 0.2s ease;
+            transition: all 0.2s ease;  /* Smooth hover effect */
             font-size: 0.95rem;
             font-weight: 500;
-            display: inline-block;
         }
 
         nav ul li a:hover {
             background: var(--accent);
             border-color: var(--accent);
             color: var(--bg-primary);
-            transform: translateY(-2px);
+            transform: translateY(-2px);  /* Lift effect on hover */
         }
 
-        .user-info {
-            color: var(--text-secondary);
-            padding: 0.625rem 1.25rem;
-            font-size: 0.95rem;
-        }
+        /* ================================================================
+           SECTION 4: REVIEW CARDS GRID
+           ================================================================
+           Responsive grid layout for review cards.
+           Cards show movie poster, title, rating, and excerpt.
+           ================================================================ */
 
-        /* Container */
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 3rem 2rem;
-        }
-
-        /* Hero */
-        .hero {
-            text-align: center;
-            margin-bottom: 3rem;
-        }
-
-        .hero h1 {
-            font-size: 2.5rem;
-            font-weight: 800;
-            margin-bottom: 1rem;
-            background: linear-gradient(135deg, var(--text-primary) 0%, var(--text-secondary) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .hero p {
-            color: var(--text-secondary);
-            font-size: 1.125rem;
-        }
-
-        /* Section Title */
-        .section-title {
-            font-size: 1.875rem;
-            font-weight: 700;
-            margin-bottom: 2rem;
-            text-align: center;
-        }
-
-        /* Review Cards */
         .reviews-grid {
             display: grid;
+            /* Auto-fill creates as many columns as fit, min 350px each */
             grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-            gap: 1.5rem;
+            gap: 1.5rem;  /* Space between cards */
         }
 
         .review {
@@ -148,9 +132,10 @@
             transition: all 0.3s ease;
             position: relative;
             overflow: hidden;
-            cursor: pointer;
+            cursor: pointer;  /* Shows it's clickable */
         }
 
+        /* Animated gold bar at top of card (hidden by default) */
         .review::before {
             content: '';
             position: absolute;
@@ -159,10 +144,11 @@
             right: 0;
             height: 4px;
             background: linear-gradient(90deg, var(--accent) 0%, var(--accent-hover) 100%);
-            transform: scaleX(0);
+            transform: scaleX(0);  /* Hidden by default */
             transition: transform 0.3s ease;
         }
 
+        /* Hover effects - card lifts and gold bar appears */
         .review:hover {
             transform: translateY(-4px);
             border-color: var(--accent);
@@ -170,128 +156,31 @@
         }
 
         .review:hover::before {
-            transform: scaleX(1);
+            transform: scaleX(1);  /* Show gold bar */
         }
 
-        .review h3 {
-            font-size: 1.375rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-        }
-
-        .review h3 a {
-            color: var(--text-primary);
-            text-decoration: none;
-        }
-
-        .film-title {
-            color: var(--text-secondary);
-            font-size: 0.95rem;
-            margin-bottom: 0.75rem;
-        }
-
-        .film-title strong {
-            color: var(--accent);
-        }
-
-        .review-rating {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
+        /* Movie poster image */
+        .review-photo {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;  /* Crop to fit without distortion */
+            border-radius: 12px;
             margin-bottom: 1rem;
         }
 
+        /* Star rating display */
         .stars {
             color: var(--accent);
             font-size: 1.125rem;
         }
 
-        .rating-text {
-            color: var(--text-secondary);
-            font-size: 0.95rem;
-            font-weight: 600;
-        }
+        /* ================================================================
+           SECTION 5: FLASH MESSAGES
+           ================================================================
+           Animated notification messages for user feedback.
+           Different colors for success, error, warning, info.
+           ================================================================ */
 
-        .review p {
-            color: var(--text-secondary);
-            line-height: 1.7;
-            margin-bottom: 1rem;
-        }
-
-        .review-meta {
-            color: var(--text-secondary);
-            font-size: 0.875rem;
-            font-style: italic;
-            border-top: 1px solid var(--border);
-            padding-top: 1rem;
-            margin-top: 1rem;
-        }
-
-        .review-meta strong {
-            color: var(--accent);
-            font-style: normal;
-        }
-
-        .review-photo {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-            border-radius: 12px;
-            margin-bottom: 1rem;
-        }
-
-        /* Card Actions Overlay */
-        .card-actions {
-            position: absolute;
-            inset: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: rgba(10, 10, 20, 0.95);
-            backdrop-filter: blur(8px);
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.2s ease;
-            border-radius: 16px;
-        }
-
-        .review.show-actions .card-actions {
-            opacity: 1;
-            pointer-events: auto;
-        }
-
-        .actions-panel {
-            display: flex;
-            gap: 0.75rem;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-
-        .actions-panel .button,
-        .actions-panel button {
-            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%);
-            color: var(--bg-primary);
-            padding: 0.75rem 1.5rem;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: 700;
-            border: none;
-            cursor: pointer;
-            font-size: 0.95rem;
-            transition: all 0.2s ease;
-        }
-
-        .actions-panel .button:hover,
-        .actions-panel button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(234, 179, 8, 0.3);
-        }
-
-        .actions-panel form {
-            display: inline;
-        }
-
-        /* Flash Messages */
         .flash-message {
             display: flex;
             align-items: center;
@@ -299,11 +188,10 @@
             padding: 1rem 1.25rem;
             border-radius: 12px;
             margin-bottom: 1.5rem;
-            font-size: 0.95rem;
-            font-weight: 500;
-            animation: slideIn 0.3s ease;
+            animation: slideIn 0.3s ease;  /* Slide down animation */
         }
 
+        /* Animation keyframes */
         @keyframes slideIn {
             from {
                 opacity: 0;
@@ -315,66 +203,32 @@
             }
         }
 
+        /* Different colors for different message types */
         .flash-success {
-            background: rgba(34, 197, 94, 0.1);
+            background: rgba(34, 197, 94, 0.1);   /* Green */
             border: 1px solid rgba(34, 197, 94, 0.3);
             color: #22c55e;
         }
 
         .flash-error {
-            background: rgba(239, 68, 68, 0.1);
+            background: rgba(239, 68, 68, 0.1);   /* Red */
             border: 1px solid rgba(239, 68, 68, 0.3);
             color: #ef4444;
         }
 
         .flash-warning {
-            background: rgba(234, 179, 8, 0.1);
+            background: rgba(234, 179, 8, 0.1);   /* Yellow */
             border: 1px solid rgba(234, 179, 8, 0.3);
             color: var(--accent);
         }
 
-        .flash-info {
-            background: rgba(59, 130, 246, 0.1);
-            border: 1px solid rgba(59, 130, 246, 0.3);
-            color: #3b82f6;
-        }
+        /* ================================================================
+           SECTION 6: RESPONSIVE DESIGN
+           ================================================================
+           Media query adjusts layout for mobile devices.
+           Changes: smaller text, single column grid, adjusted spacing.
+           ================================================================ */
 
-        .flash-icon {
-            font-size: 1.25rem;
-            font-weight: 700;
-        }
-
-        .flash-close {
-            margin-left: auto;
-            background: none;
-            border: none;
-            color: inherit;
-            font-size: 1.5rem;
-            cursor: pointer;
-            opacity: 0.6;
-            transition: opacity 0.2s;
-            padding: 0;
-        }
-
-        .flash-close:hover {
-            opacity: 1;
-        }
-
-        /* Empty State */
-        .empty-state {
-            text-align: center;
-            padding: 4rem 2rem;
-            color: var(--text-secondary);
-        }
-
-        .empty-state svg {
-            width: 120px;
-            height: 120px;
-            margin-bottom: 1.5rem;
-            opacity: 0.3;
-        }
-
-        /* Responsive */
         @media (max-width: 768px) {
             .header {
                 padding: 1rem;
@@ -382,6 +236,10 @@
 
             .logo {
                 font-size: 1.5rem;
+            }
+
+            .reviews-grid {
+                grid-template-columns: 1fr;  /* Single column on mobile */
             }
 
             nav ul {
@@ -392,40 +250,38 @@
                 padding: 0.5rem 1rem;
                 font-size: 0.875rem;
             }
-
-            .container {
-                padding: 2rem 1rem;
-            }
-
-            .hero h1 {
-                font-size: 2rem;
-            }
-
-            .hero p {
-                font-size: 1rem;
-            }
-
-            .reviews-grid {
-                grid-template-columns: 1fr;
-            }
         }
     </style>
 </head>
+
 <body>
+
+    <!-- ================================================================
+         SECTION 7: HEADER WITH NAVIGATION
+         ================================================================
+         Navigation bar shows different options based on login status.
+         Uses Jinja2 {% if session.username %} to check login state.
+         ================================================================ -->
 
     <div class="header">
         <div class="header-content">
+            <!-- Logo -->
             <div class="logo">🎬 CineVibe</div>
             
+            <!-- Navigation Menu -->
             <nav>
                 <ul>
+                    <!-- Always visible links -->
                     <li><a href="{{ url_for('home') }}">Home</a></li>
                     <li><a href="{{ url_for('add_review') }}">Add Review</a></li>
 
+                    <!-- Conditional links based on login status -->
                     {% if session.username %}
+                        <!-- User IS logged in - show username and logout -->
                         <li class="user-info">👤 {{ session.username }}</li>
                         <li><a href="{{ url_for('logout') }}">Logout</a></li>
                     {% else %}
+                        <!-- User NOT logged in - show login/register -->
                         <li><a href="{{ url_for('login') }}">Login</a></li>
                         <li><a href="{{ url_for('register') }}">Register</a></li>
                     {% endif %}
@@ -434,61 +290,116 @@
         </div>
     </div>
 
+    <!-- ================================================================
+         SECTION 8: MAIN CONTENT CONTAINER
+         ================================================================
+         Contains flash messages, hero section, and reviews grid.
+         ================================================================ -->
+
     <div class="container">
-        <!-- Flash Messages -->
+        <!-- Flash Messages (if any) -->
+        <!-- Jinja2 with block gets flash messages from Flask -->
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 {% for category, message in messages %}
                     <div class="flash-message flash-{{ category }}">
+                        <!-- Icon based on message type -->
                         <span class="flash-icon">
-                            {% if category == 'success' %}✓{% elif category == 'error' %}✕{% elif category == 'warning' %}⚠{% else %}ℹ{% endif %}
+                            {% if category == 'success' %}✓
+                            {% elif category == 'error' %}✕
+                            {% elif category == 'warning' %}⚠
+                            {% else %}ℹ
+                            {% endif %}
                         </span>
                         <span>{{ message }}</span>
+                        <!-- Close button -->
                         <button class="flash-close" onclick="this.parentElement.remove()">×</button>
                     </div>
                 {% endfor %}
             {% endif %}
         {% endwith %}
 
+        <!-- Hero Section -->
         <div class="hero">
             <h1>Discover & Share Movie Reviews</h1>
             <p>Your ultimate destination for honest movie opinions</p>
         </div>
 
+        <!-- Section Title -->
         <h2 class="section-title">Recent Reviews</h2>
+
+        <!-- ================================================================
+             SECTION 9: REVIEWS GRID
+             ================================================================
+             Loops through reviews from database and displays each as a card.
+             Uses Jinja2 {% for review in reviews %} loop.
+             Shows empty state if no reviews exist.
+             ================================================================ -->
 
         {% if reviews %}
             <div class="reviews-grid">
+                <!-- Loop through each review -->
                 {% for review in reviews %}
                     <div class="review" data-owner="{{ review['user_id'] }}">
+                        
+                        <!-- Movie Poster Image (if exists) -->
                         {% if review["photo"] %}
-                            <img src="{{ url_for('static', filename='uploads/' + review['photo']) }}" alt="{{ review['title'] }}" class="review-photo">
+                            <img src="{{ url_for('static', filename='uploads/' + review['photo']) }}" 
+                                 alt="{{ review['title'] }}" 
+                                 class="review-photo">
                         {% endif %}
                         
-                        <h3><a href="{{ url_for('view_review', review_id=review['id']) }}">{{ review["title"] }}</a></h3>
+                        <!-- Review Title (clickable link to full review) -->
+                        <h3>
+                            <a href="{{ url_for('view_review', review_id=review['id']) }}">
+                                {{ review["title"] }}
+                            </a>
+                        </h3>
                         
-                        <div class="film-title">Film: <strong>{{ review["film_title"] }}</strong></div>
+                        <!-- Film Name -->
+                        <div class="film-title">
+                            Film: <strong>{{ review["film_title"] }}</strong>
+                        </div>
                         
+                        <!-- Star Rating -->
                         <div class="review-rating">
                             <span class="stars">
+                                <!-- Show filled stars based on rating -->
                                 {% for i in range(review["rating"]|int) %}★{% endfor %}
+                                <!-- Show empty stars for remaining -->
                                 {% for i in range(5 - review["rating"]|int) %}☆{% endfor %}
                             </span>
                             <span class="rating-text">{{ review["rating"] }}/5</span>
                         </div>
                         
+                        <!-- Review Excerpt -->
                         <p>{{ review["content"] }}</p>
                         
+                        <!-- Review Metadata (author and date) -->
                         <div class="review-meta">
-                            Reviewed by <strong>{{ review["username"] }}</strong> on {{ review["date"] }}
+                            Reviewed by <strong>{{ review["username"] }}</strong> 
+                            on {{ review["date"] }}
                         </div>
 
+                        <!-- Action Buttons (only for review owner) -->
                         <div class="card-actions">
                             <div class="actions-panel">
-                                <a class="button" href="{{ url_for('view_review', review_id=review['id']) }}">View</a>
+                                <!-- View button (everyone) -->
+                                <a class="button" href="{{ url_for('view_review', review_id=review['id']) }}">
+                                    View
+                                </a>
+                                
+                                <!-- Edit/Delete buttons (only owner) -->
                                 {% if session.user_id and session.user_id == review['user_id'] %}
-                                    <a class="button" href="{{ url_for('edit_review', review_id=review['id']) }}">Edit</a>
-                                    <form method="post" action="{{ url_for('delete_review', review_id=review['id']) }}" onsubmit="return confirm('Delete this review?');">
+                                    <a class="button" href="{{ url_for('edit_review', review_id=review['id']) }}">
+                                        Edit
+                                    </a>
+                                    
+                                    <!-- Delete form with confirmation -->
+                                    <form method="post" 
+                                          action="{{ url_for('delete_review', review_id=review['id']) }}" 
+                                          onsubmit="return confirm('Delete this review?');">
+                                        <!-- CSRF token for security -->
                                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                         <button type="submit">Delete</button>
                                     </form>
@@ -498,37 +409,61 @@
                     </div>
                 {% endfor %}
             </div>
+            
         {% else %}
+            <!-- Empty State (no reviews yet) -->
             <div class="empty-state">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                          d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z" />
                 </svg>
                 <p>No reviews yet. Be the first to share your thoughts!</p>
             </div>
         {% endif %}
     </div>
 
+    <!-- ================================================================
+         SECTION 10: JAVASCRIPT FOR INTERACTIVITY
+         ================================================================
+         Adds click functionality to review cards.
+         If user owns review: Show edit/delete buttons
+         If user doesn't own review: Navigate to review detail page
+         ================================================================ -->
+
     <script>
-        // Click review card to show/hide actions
+        // Get current user ID from session (or null if not logged in)
         const currentUser = {{ session.get('user_id')|tojson }};
+        
+        // Add click handler to each review card
         document.querySelectorAll('.review').forEach(card => {
             card.addEventListener('click', (e) => {
-                // Ignore clicks on links, buttons, forms
-                if (e.target.closest('a') || e.target.closest('button') || e.target.closest('form')) return;
+                // Don't trigger if clicking on links, buttons, or forms
+                if (e.target.closest('a') || e.target.closest('button') || e.target.closest('form')) {
+                    return;
+                }
                 
+                // Get the owner of this review from data-owner attribute
                 const owner = card.dataset.owner ? parseInt(card.dataset.owner) : null;
+                
+                // If current user owns this review
                 if (currentUser && owner && currentUser === owner) {
+                    // Toggle visibility of edit/delete buttons
                     card.classList.toggle('show-actions');
                 } else {
+                    // Otherwise, navigate to review detail page
                     const link = card.querySelector('h3 a');
-                    if (link) window.location = link.href;
+                    if (link) {
+                        window.location = link.href;
+                    }
                 }
             });
             
             // Prevent actions panel from closing when clicked
             const actions = card.querySelector('.card-actions');
             if (actions) {
-                actions.addEventListener('click', (e) => e.stopPropagation());
+                actions.addEventListener('click', (e) => {
+                    e.stopPropagation();  // Don't trigger parent card click
+                });
             }
         });
     </script>
