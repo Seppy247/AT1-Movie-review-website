@@ -1,8 +1,9 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Edit Review - CineVibe</title>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Review - CineVibe</title>
     <style>
         * {
             margin: 0;
@@ -25,6 +26,8 @@
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
             background: var(--bg-primary); 
             color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
         }
 
         .container { 
@@ -34,25 +37,96 @@
         }
 
         .logo {
-            font-size: 1.5rem;
+            font-size: 1.75rem;
             font-weight: 800;
             background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        
+        /* Flash Messages */
+        .flash-message {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem 1.25rem;
+            border-radius: 12px;
             margin-bottom: 1.5rem;
+            font-size: 0.95rem;
+            font-weight: 500;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .flash-success {
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            color: #22c55e;
+        }
+
+        .flash-error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #ef4444;
+        }
+
+        .flash-warning {
+            background: rgba(234, 179, 8, 0.1);
+            border: 1px solid rgba(234, 179, 8, 0.3);
+            color: var(--accent);
+        }
+
+        .flash-info {
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            color: #3b82f6;
+        }
+
+        .flash-icon {
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .flash-close {
+            margin-left: auto;
+            background: none;
+            border: none;
+            color: inherit;
+            font-size: 1.5rem;
+            cursor: pointer;
+            opacity: 0.6;
+            transition: opacity 0.2s;
+            padding: 0;
+        }
+
+        .flash-close:hover {
+            opacity: 1;
         }
 
         .card { 
             background: var(--bg-card); 
-            padding: 1.5rem; 
-            border-radius: 12px; 
+            padding: 2rem; 
+            border-radius: 16px; 
             border: 1px solid var(--border);
         }
 
         h1 {
             margin-bottom: 1.5rem;
-            font-size: 1.75rem;
+            font-size: 2rem;
+            font-weight: 700;
         }
 
         .form-group {
@@ -64,17 +138,19 @@
             font-weight: 600;
             margin-bottom: 0.5rem;
             color: var(--text-primary);
+            font-size: 0.95rem;
         }
 
         input[type="text"], 
         textarea, 
-        select { 
+        select,
+        input[type="file"] { 
             width: 100%; 
-            padding: 0.8rem; 
-            border-radius: 8px; 
+            padding: 0.875rem 1rem; 
+            border-radius: 10px; 
             background: var(--bg-secondary); 
             color: var(--text-primary); 
-            border: 1px solid var(--border);
+            border: 2px solid var(--border);
             font-family: inherit;
             font-size: 1rem;
             transition: all 0.2s ease;
@@ -90,19 +166,25 @@
 
         textarea {
             resize: vertical;
-            min-height: 120px;
+            min-height: 150px;
+        }
+
+        select {
+            cursor: pointer;
         }
 
         button { 
+            width: 100%;
             background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%); 
             color: var(--bg-primary); 
-            padding: 0.8rem 1.5rem; 
-            border-radius: 8px; 
+            padding: 1rem 2rem; 
+            border-radius: 10px; 
             border: none; 
             font-weight: 700;
             cursor: pointer;
-            font-size: 1rem;
+            font-size: 1.05rem;
             transition: all 0.3s ease;
+            margin-top: 1rem;
         }
 
         button:hover {
@@ -111,101 +193,66 @@
         }
 
         .back-link {
-            margin-top: 1rem;
+            margin-top: 2rem;
+            text-align: center;
         }
 
         .back-link a {
             color: var(--text-secondary);
             text-decoration: none;
             transition: color 0.2s ease;
+            font-size: 0.95rem;
         }
 
         .back-link a:hover {
             color: var(--accent);
         }
 
-        /* Search input styling */
-        .search-input-wrapper {
-            position: relative;
-            margin-bottom: 0.5rem;
-        }
-
-        .search-input-wrapper input {
-            width: 100%;
-            padding: 0.875rem 1rem;
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            color: var(--text-primary);
-            font-size: 1rem;
-            font-family: inherit;
-            transition: all 0.2s ease;
-        }
-
-        .search-input-wrapper input:focus {
-            outline: none;
-            border-color: var(--accent);
-            box-shadow: 0 0 0 3px rgba(234, 179, 8, 0.1);
-        }
-
-        .search-input-wrapper input::placeholder {
-            color: var(--text-secondary);
-        }
-
-        .search-dropdown {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            right: 0;
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-top: none;
-            border-radius: 0 0 8px 8px;
-            max-height: 200px;
-            overflow-y: auto;
-            z-index: 10;
-            display: none;
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        .search-dropdown.active {
-            display: block;
-        }
-
-        .search-dropdown li {
-            padding: 0.75rem 1rem;
-            cursor: pointer;
-            transition: background 0.2s ease;
-            color: var(--text-secondary);
-        }
-
-        .search-dropdown li:hover,
-        .search-dropdown li.selected {
-            background: var(--bg-card);
-            color: var(--accent);
-        }
-
-        .search-dropdown li.empty {
-            color: var(--text-secondary);
-            cursor: default;
-        }
-
-        .search-dropdown li.empty:hover {
-            background: transparent;
-        }
-
         img {
-            max-width: 200px;
-            border-radius: 8px;
+            max-width: 100%;
+            max-height: 200px;
+            border-radius: 12px;
             margin: 0.75rem 0;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 2rem 1rem;
+            }
+
+            .card {
+                padding: 1.5rem;
+            }
+
+            h1 {
+                font-size: 1.75rem;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="logo">🎬 CineVibe</div>
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash-message flash-{{ category }}">
+                        <span class="flash-icon">
+                            {% if category == 'success' %}✓
+                            {% elif category == 'error' %}✕
+                            {% elif category == 'warning' %}⚠
+                            {% else %}ℹ
+                            {% endif %}
+                        </span>
+                        <span>{{ message }}</span>
+                        <button class="flash-close" onclick="this.parentElement.remove()">×</button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
 
         <div class="card">
             <h1>Edit Review</h1>
@@ -214,22 +261,21 @@
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
                 <div class="form-group">
-                    <label for="title">Movie Title</label>
-                    <div class="search-input-wrapper">
-                        <input type="text" id="title" name="title" value="{{ review['title'] }}" required>
-                    </div>
+                    <label for="title">Review Title</label>
+                    <input type="text" id="title" name="title" value="{{ review['title'] }}" placeholder="Enter review title" required>
                 </div>
 
                 <div class="form-group">
-                    <label for="filmSearch">Select Film</label>
-                    <div class="search-input-wrapper">
-                        <input type="text" id="filmSearch" placeholder="Search or select film...">
-                        <ul class="search-dropdown" id="filmDropdown"></ul>
-                    </div>
+                    <label for="film">Film</label>
                     <input type="hidden" id="film" name="film_id" value="{{ review['film_id'] }}">
-                    <div id="newFilmWrapperEdit" style="margin-top:0.75rem; display:none;">
-                        <input type="text" id="newFilmEdit" name="new_film" placeholder="Enter new film title" style="width:100%; padding:0.75rem; border-radius:8px; background:var(--bg-secondary); border:1px solid var(--border); color:var(--text-primary);">
-                    </div>
+                    <select id="filmSelect" onchange="document.getElementById('film').value = this.value" required>
+                        <option value="">Select a film</option>
+                        {% for film in films %}
+                            <option value="{{ film.id }}" {% if film.id == review['film_id'] %}selected{% endif %}>
+                                {{ film.title }}
+                            </option>
+                        {% endfor %}
+                    </select>
                 </div>
 
                 <div class="form-group">
@@ -237,117 +283,36 @@
                     <select id="rating" name="rating" required>
                         <option value="">Select your rating</option>
                         {% for r in range(1,6) %}
-                            <option value="{{ r }}" {% if r == review['rating']|int %}selected{% endif %}>{{ r }}</option>
+                            <option value="{{ r }}" {% if r == review['rating']|int %}selected{% endif %}>
+                                {{ r }} - {% if r == 1 %}Terrible{% elif r == 2 %}Poor{% elif r == 3 %}Okay{% elif r == 4 %}Good{% else %}Amazing{% endif %}
+                            </option>
                         {% endfor %}
                     </select>
                 </div>
 
                 <div class="form-group">
                     <label for="content">Your Review</label>
-                    <textarea id="content" name="content" required>{{ review['content'] }}</textarea>
+                    <textarea id="content" name="content" placeholder="What did you think about this movie?" required>{{ review['content'] }}</textarea>
                 </div>
 
                 <div class="form-group">
                     <label>Current Photo</label>
                     {% if review['photo'] %}
-                        <div><img src="{{ url_for('static', filename='uploads/' + review['photo']) }}" alt="photo"></div>
+                        <div><img src="{{ url_for('static', filename='uploads/' + review['photo']) }}" alt="Current photo"></div>
                     {% else %}
-                        <div style="color:var(--text-secondary)">No photo uploaded.</div>
+                        <div style="color:var(--text-secondary)">No photo uploaded</div>
                     {% endif %}
-                    <label for="photo">Replace Photo (optional)</label>
+                    <label for="photo" style="margin-top: 1rem;">Replace Photo (optional)</label>
                     <input type="file" id="photo" name="photo" accept="image/*">
                 </div>
 
-                <button type="submit">Save Changes</button>
+                <button type="submit">💾 Save Changes</button>
             </form>
 
-            <div class="back-link"><a href="{{ url_for('view_review', review_id=review['id']) }}">← Back to review</a></div>
+            <div class="back-link">
+                <a href="{{ url_for('view_review', review_id=review['id']) }}">← Back to review</a>
+            </div>
         </div>
     </div>
-
-    <script>
-        // Film data from template (JSON-encoded for safety)
-        const films = {{ films | tojson | safe }};
-
-        const filmSearch = document.getElementById('filmSearch');
-        const filmDropdown = document.getElementById('filmDropdown');
-        const filmInput = document.getElementById('film');
-        const newFilmWrapper = document.getElementById('newFilmWrapperEdit');
-        const newFilm = document.getElementById('newFilmEdit');
-
-        // Set initial display with current film
-        const currentFilmId = parseInt(filmInput.value);
-        if (currentFilmId) {
-            const currentFilm = films.find(f => f.id === currentFilmId);
-            if (currentFilm) {
-                filmSearch.value = currentFilm.title;
-            }
-        }
-
-        // Populate dropdown with all films on focus
-        filmSearch.addEventListener('focus', () => {
-            displayFilmOptions(films);
-        });
-
-        // Filter films on input
-        filmSearch.addEventListener('input', (e) => {
-            const query = e.target.value.toLowerCase();
-            const filtered = films.filter(film => 
-                film.title.toLowerCase().includes(query)
-            );
-            displayFilmOptions(filtered);
-        });
-
-        // Close dropdown when clicking outside
-        document.addEventListener('click', (e) => {
-            if (e.target !== filmSearch) {
-                filmDropdown.classList.remove('active');
-            }
-        });
-
-        function displayFilmOptions(options) {
-            filmDropdown.innerHTML = '';
-            
-            if (options.length === 0) {
-                const li = document.createElement('li');
-                li.className = 'empty';
-                li.textContent = '➕ No films found - Add new film';
-                li.onclick = () => {
-                    filmSearch.value = '';
-                    filmInput.value = 'new';
-                    newFilmWrapper.style.display = 'block';
-                    newFilm.required = true;
-                    filmSearch.required = false;
-                    filmDropdown.classList.remove('active');
-                    newFilm.focus();
-                };
-                filmDropdown.appendChild(li);
-            } else {
-                options.forEach(film => {
-                    const li = document.createElement('li');
-                    li.textContent = film.title;
-                    li.onclick = () => {
-                        filmSearch.value = film.title;
-                        filmInput.value = film.id;
-                        newFilmWrapper.style.display = 'none';
-                        newFilm.required = false;
-                        filmSearch.required = true;
-                        filmDropdown.classList.remove('active');
-                    };
-                    filmDropdown.appendChild(li);
-                });
-            }
-            
-            filmDropdown.classList.add('active');
-        }
-
-        // Validate that either a film is selected or new film is entered
-        document.querySelector('form').addEventListener('submit', (e) => {
-            if (!filmInput.value && newFilm.value === '') {
-                e.preventDefault();
-                alert('Please select a film or enter a new film title');
-            }
-        });
-    </script>
 </body>
 </html>

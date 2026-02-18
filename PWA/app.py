@@ -30,7 +30,9 @@ app.secret_key = "supersecretkey"  # Used to sign session cookies securely
 # We restrict file types to images only and sanitize filenames for security.
 # ============================================================================
 
-UPLOAD_FOLDER = os.path.join("static", "uploads")  # Where uploaded images are stored
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+# Store uploads inside this app's `static/uploads` folder (absolute path)
+UPLOAD_FOLDER = os.path.join(BASE_DIR, "static", "uploads")  # Where uploaded images are stored
 ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif"}  # Only allow image files
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 

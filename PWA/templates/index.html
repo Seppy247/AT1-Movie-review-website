@@ -54,11 +54,6 @@ It uses Jinja2 templating to dynamically display data from Flask.
             min-height: 100vh; /* Minimum full viewport height */
         }
 
-        /* Center main container text per user request */
-        .container {
-            text-align: center;
-        }
-
         /* ================================================================
            SECTION 3: HEADER & NAVIGATION
            ================================================================
@@ -74,6 +69,11 @@ It uses Jinja2 templating to dynamically display data from Flask.
             top: 0;
             z-index: 100;       /* Appears above other content */
             backdrop-filter: blur(10px);  /* Blur effect behind header */
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
         }
 
         .logo {
@@ -97,6 +97,10 @@ It uses Jinja2 templating to dynamically display data from Flask.
             gap: 1rem;
         }
 
+        nav ul li {
+            display: inline;
+        }
+
         nav ul li a {
             color: var(--text-primary);
             text-decoration: none;  /* Remove underline */
@@ -106,6 +110,7 @@ It uses Jinja2 templating to dynamically display data from Flask.
             transition: all 0.2s ease;  /* Smooth hover effect */
             font-size: 0.95rem;
             font-weight: 500;
+            display: inline-block;
         }
 
         nav ul li a:hover {
@@ -115,8 +120,53 @@ It uses Jinja2 templating to dynamically display data from Flask.
             transform: translateY(-2px);  /* Lift effect on hover */
         }
 
+        .user-info {
+            color: var(--text-secondary);
+            padding: 0.625rem 1.25rem;
+            font-size: 0.95rem;
+        }
+
         /* ================================================================
-           SECTION 4: REVIEW CARDS GRID
+           SECTION 4: CONTAINER & HERO
+           ================================================================
+           Main content container with centered hero section.
+           ================================================================ */
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+
+        .hero {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .hero h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--text-primary) 0%, var(--text-secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero p {
+            color: var(--text-secondary);
+            font-size: 1.125rem;
+        }
+
+        .section-title {
+            font-size: 1.875rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        /* ================================================================
+           SECTION 5: REVIEW CARDS GRID
            ================================================================
            Responsive grid layout for review cards.
            Cards show movie poster, title, rating, and excerpt.
@@ -138,7 +188,6 @@ It uses Jinja2 templating to dynamically display data from Flask.
             position: relative;
             overflow: hidden;
             cursor: pointer;  /* Shows it's clickable */
-            text-align: center;
         }
 
         /* Animated gold bar at top of card (hidden by default) */
@@ -165,6 +214,34 @@ It uses Jinja2 templating to dynamically display data from Flask.
             transform: scaleX(1);  /* Show gold bar */
         }
 
+        .review h3 {
+            font-size: 1.375rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .review h3 a {
+            color: var(--text-primary);
+            text-decoration: none;
+        }
+
+        .film-title {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .film-title strong {
+            color: var(--accent);
+        }
+
+        .review-rating {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
         /* Movie poster image */
         .review-photo {
             width: 100%;
@@ -180,8 +257,85 @@ It uses Jinja2 templating to dynamically display data from Flask.
             font-size: 1.125rem;
         }
 
+        .rating-text {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            font-weight: 600;
+        }
+
+        .review p {
+            color: var(--text-secondary);
+            line-height: 1.7;
+            margin-bottom: 1rem;
+        }
+
+        .review-meta {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            font-style: italic;
+            border-top: 1px solid var(--border);
+            padding-top: 1rem;
+            margin-top: 1rem;
+        }
+
+        .review-meta strong {
+            color: var(--accent);
+            font-style: normal;
+        }
+
+        /* Card Actions Overlay */
+        .card-actions {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(10, 10, 20, 0.95);
+            backdrop-filter: blur(8px);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+            border-radius: 16px;
+        }
+
+        .review.show-actions .card-actions {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .actions-panel {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .actions-panel .button,
+        .actions-panel button {
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%);
+            color: var(--bg-primary);
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+        }
+
+        .actions-panel .button:hover,
+        .actions-panel button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(234, 179, 8, 0.3);
+        }
+
+        .actions-panel form {
+            display: inline;
+        }
+
         /* ================================================================
-           SECTION 5: FLASH MESSAGES
+           SECTION 6: FLASH MESSAGES
            ================================================================
            Animated notification messages for user feedback.
            Different colors for success, error, warning, info.
@@ -228,8 +382,54 @@ It uses Jinja2 templating to dynamically display data from Flask.
             color: var(--accent);
         }
 
+        .flash-info {
+            background: rgba(59, 130, 246, 0.1);   /* Blue */
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            color: #3b82f6;
+        }
+
+        .flash-icon {
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .flash-close {
+            margin-left: auto;
+            background: none;
+            border: none;
+            color: inherit;
+            font-size: 1.5rem;
+            cursor: pointer;
+            opacity: 0.6;
+            transition: opacity 0.2s;
+            padding: 0;
+        }
+
+        .flash-close:hover {
+            opacity: 1;
+        }
+
         /* ================================================================
-           SECTION 6: RESPONSIVE DESIGN
+           SECTION 7: EMPTY STATE
+           ================================================================
+           Displayed when there are no reviews yet.
+           ================================================================ */
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--text-secondary);
+        }
+
+        .empty-state svg {
+            width: 120px;
+            height: 120px;
+            margin-bottom: 1.5rem;
+            opacity: 0.3;
+        }
+
+        /* ================================================================
+           SECTION 8: RESPONSIVE DESIGN
            ================================================================
            Media query adjusts layout for mobile devices.
            Changes: smaller text, single column grid, adjusted spacing.
@@ -244,10 +444,6 @@ It uses Jinja2 templating to dynamically display data from Flask.
                 font-size: 1.5rem;
             }
 
-            .reviews-grid {
-                grid-template-columns: 1fr;  /* Single column on mobile */
-            }
-
             nav ul {
                 gap: 0.5rem;
             }
@@ -256,6 +452,22 @@ It uses Jinja2 templating to dynamically display data from Flask.
                 padding: 0.5rem 1rem;
                 font-size: 0.875rem;
             }
+
+            .container {
+                padding: 2rem 1rem;
+            }
+
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .hero p {
+                font-size: 1rem;
+            }
+
+            .reviews-grid {
+                grid-template-columns: 1fr;  /* Single column on mobile */
+            }
         }
     </style>
 </head>
@@ -263,10 +475,10 @@ It uses Jinja2 templating to dynamically display data from Flask.
 <body>
 
     <!-- ================================================================
-         SECTION 7: HEADER WITH NAVIGATION
+         SECTION 9: HEADER WITH NAVIGATION
          ================================================================
          Navigation bar shows different options based on login status.
-         Uses Jinja2 {% raw %}{% if session.username %}{% endraw %} to check login state.
+         Uses Jinja2 {% if session.username %} to check login state.
          ================================================================ -->
 
     <div class="header">
@@ -297,7 +509,7 @@ It uses Jinja2 templating to dynamically display data from Flask.
     </div>
 
     <!-- ================================================================
-         SECTION 8: MAIN CONTENT CONTAINER
+         SECTION 10: MAIN CONTENT CONTAINER
          ================================================================
          Contains flash messages, hero section, and reviews grid.
          ================================================================ -->
@@ -332,13 +544,13 @@ It uses Jinja2 templating to dynamically display data from Flask.
         </div>
 
         <!-- Section Title -->
-            <h2 class="section-title">Recent Reviews</h2>
+        <h2 class="section-title">Recent Reviews</h2>
 
         <!-- ================================================================
-             SECTION 9: REVIEWS GRID
+             SECTION 11: REVIEWS GRID
              ================================================================
              Loops through reviews from database and displays each as a card.
-             Uses Jinja2 {% raw %}{% for review in reviews %}{% endraw %} loop.
+             Uses Jinja2 {% for review in reviews %} loop.
              Shows empty state if no reviews exist.
              ================================================================ -->
 
@@ -429,7 +641,7 @@ It uses Jinja2 templating to dynamically display data from Flask.
     </div>
 
     <!-- ================================================================
-         SECTION 10: JAVASCRIPT FOR INTERACTIVITY
+         SECTION 12: JAVASCRIPT FOR INTERACTIVITY
          ================================================================
          Adds click functionality to review cards.
          If user owns review: Show edit/delete buttons
