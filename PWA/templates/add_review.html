@@ -409,7 +409,7 @@
             <form method="POST" enctype="multipart/form-data">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <div class="form-group">
-                    <label for="title">Movie Title</label>
+                    <label for="title">Heading</label>
                     <div class="search-input-wrapper">
                         <input type="text" id="title" name="title" placeholder="Type movie title..." required>
                     </div>
@@ -448,7 +448,7 @@
                 <div class="form-group">
                     <label>Movie Photo</label>
                     <div class="file-input-wrapper">
-                        <input type="file" id="photo" name="photo" accept="image/*" required onchange="updateFileName(this)">
+                            <input type="file" id="photo" name="photo" accept="image/*" onchange="updateFileName(this)">
                         <label for="photo" class="file-input-label">
                             <span>📷</span>
                             <span>Choose a photo</span>
